@@ -3,7 +3,7 @@
 
 '''
 http://math.stackexchange.com/questions/38671/two-sets-of-3-positive-integers-with-equal-sum-and-product/
-Find {A,B,C} and {X,Y,Z} unequal so that A+B+C = X+Y+Z, ABC = XYZ, and each integer x satisfies 2 < x < 18
+Find distinct {A,B,C} and {X,Y,Z} so that A+B+C = X+Y+Z, ABC = XYZ, and each integer x satisfies 2 < x < 18
 '''
 
 ss = {} #Triples which give a certain (sum, product)
