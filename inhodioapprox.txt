@@ -1,4 +1,4 @@
-//Integers n for which 2^n starts with "2011"
+# Integers n for which 2^n starts with "2011"
 1848
 3984
 6120
