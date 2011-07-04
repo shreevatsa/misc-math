@@ -1,21 +1,22 @@
-survey                                  Interpreting results of survey. Probability, inference, estimation, Bayesian statistics. Incomplete.
-tupper-selfref                          Tupper's self-referential formula. From N to figure, figure to N, etc.
-continued_fraction.c                    Print all "best rational approximations" of a real number. (Prints a few extra ones, need to fix).
-best_approximation.py                   Brute-force solution to above.
-continued_fraction-dw.py                Code from http://www.daniweb.com/code/snippet223956.html ; prints only convergents so is wrong.
-permut-.....CCCCCC.cpp                  [MSE 36851] All permutations of ".....CCCCCC".
-kth-combination.py                      [MSE 36876] [SO 5878768] Print the kth combination of r letters.
-mse-38671-triples.py                    [MSE 38671] Find triples that have the same sum and product.
-looksay.cpp                             For testing a heuristic (it's wrong) about whether one can go backwards in the look-and-say sequence
-dice-allnossim.py                       Find expected number of times to throw a pair dice until all numbers 2 to 12 appear -- simulation
-dice-allnos.py                          Find expected number of times to throw a pair dice until all numbers 2 to 12 appear -- exact
-powers-mse42420.py                      When is the first digit of 2^n and of 5^n the same? And is it always 3? 
-diophantine.java                        Straightforward recursive solution to linear Diophantine equations
-cardguesswrong.py                       Trying to guess every card 'incorrectly' in a deck. Probability of succeeding.
-cardguesswrong-old.py                   Older version of above.
+adjacent-multiples.py                   [MSE 46964] Sets S of n integers s.t. kS is consecutive modulo m.
 bad_calculator.py                       Multiply keeping k bits of precision 
-inhodioapprox-bf.py                     Powers of 2 starting with '2011'. Brute force.
-inhodioapprox-bf.cpp                    Powers of 2 starting with '2011'. Faster brute force.
-inhodioapprox.txt                       List of those powers up to 1,000,000 (there are 216 of them).
-inhodioapprox.sage                      Same. Inhomogeneous diophantine approximation, continued fractions, convergents, etc.
+best_approximation.py                   Brute-force solution to print all "best rational approximations"
+cardguesswrong-old.py                   Older version of below.
+cardguesswrong.py                       Dundee: guessing every card 'incorrectly' in a deck. Probability of succeeding.
+continued_fraction-dw.py                Code from http://www.daniweb.com/code/snippet223956.html ; prints only convergents
+continued_fraction.c                    Print "best rational approximations" of a real number (plus a few extra ones TOFIX)
+dice-allnos.py                          Find expected no. of times to throw dice until all numbers 2 to 12 appear -- exact
+dice-allnossim.py                       Find expected no. of times to throw dice until all numbers 2 to 12 appear -- simul
+diophantine.java                        Straightforward recursive solution to linear Diophantine equations
+fillones.sage                           [MSE 47520] Expected time of a certain Markov chain
+inhodioapprox-bf.cpp                    [MSE 46100] Powers of 2 starting with '2011'. Faster brute force.
+inhodioapprox-bf.py                     [MSE 46100] Powers of 2 starting with '2011'. Brute force.
+inhodioapprox.sage                      [MSE 46100] Inhomogeneous diophantine approximation in general.
+inhodioapprox.txt                       [MSE 46100] List of those powers up to 1,000,000 (there are 216 of them).
+kth-combination.py                      [MSE 36876] [SO 5878768] Print the kth combination of r letters.
+looksay.cpp                             For testing a (wrong) heuristic about going backwards in the look-and-say sequence
+mse-38671-triples.py                    [MSE 38671] Find triples that have the same sum and product.
+permut-.....CCCCCC.cpp                  [MSE 36851] All permutations of ".....CCCCCC".
+powers-mse42420.py                      [MSE 42420] When is the first digit of 2^n and of 5^n the same? And is it always 3?
+pypermutations.py                       [SO 6534430] Compare three methods of generating all distinct permutations
 tribonacci-period                       Period of Tribonacci sequence modulo m
