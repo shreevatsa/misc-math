@@ -110,3 +110,24 @@ def m_nextperm_b(s):
     for p in next_permutationB(s):
         pass
 
+'''
+In the Python shell, try
+    l = [1, 2, 2, 2, 2, 3, 3, 3, 3, 3]
+    %timeit m_itertoolsp(l)
+    %timeit m_nextperm_b(l)
+    %timeit m_nextperm_s(l)
+etc., and repeat for different lists l.
+
+Some results ("us" means microseconds):
+
+l                                       m_itertoolsp  m_nextperm_b  m_nextperm_s
+[1, 1, 2]                               5.98 us       12.3 us       7.54 us
+[1, 2, 3, 4, 5, 6]                      0.63 ms       2.69 ms       1.77 ms
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]         6.93 s        13.68 s       8.75 s
+
+[1, 2, 3, 4, 6, 6, 6]                   3.12 ms       3.34 ms       2.19 ms
+[1, 2, 2, 2, 2, 3, 3, 3, 3, 3]          2400 ms       5.87 ms       3.63 ms
+[1, 1, 1, 1, 1, 1, 1, 1, 1, 2]          2320000 us    89.9 us       51.5 us
+[1, 1, 2, 2, 3, 3, 4, 4, 4, 4, 4, 4]    429000 ms     361 ms        228 ms
+
+'''
