@@ -8,7 +8,7 @@
 measurers = {}
 measurers[0] = set([0])
 attained  = {}
-attained[0] = True
+attained[0] = (0, 0)
 
 seen_largest = 0
 
@@ -19,14 +19,19 @@ while True:
 
   for cost in measurers.keys():
     for new in 11, 60:
-      if next == cost + new:
-        measurers.setdefault(next, set())
-        for a in measurers[cost]:
-          newval = a + new
-          for can in (a + new, abs(a-new)):
-            if attained.has_key(can): continue
-            measurers[next].add(can)
-            attained[can] = True
+      if next != cost + new: continue
+      measurers.setdefault(next, set())
+      for a in measurers[cost]:
+        newval = a + new
+        for can in (a + new, abs(a-new)):
+          if attained.has_key(can): continue
+          measurers[next].add(can)
+          attained[can] = (a, new)
+
   print next, measurers[next]
   if attained.has_key(1):
+    cur = 1
+    while cur:
+      cur, new = attained[cur]
+      print 'Attained by using a candle of %d, and ' % new, cur
     break
