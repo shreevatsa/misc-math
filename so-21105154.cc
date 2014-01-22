@@ -9,7 +9,6 @@
 */
 
 #include <iostream>
-#include <vector>
 #include <cassert>
 
 // We visualize generating a partition as a process of dropping balls numbered
@@ -19,8 +18,13 @@ class PartitionGenerator {
  public:
   PartitionGenerator(int N, int K, bool print) : N(N), K(K), print_(print) {
     assert(N % K == 0);
-    partition_.resize(N / K);
+    partition_ = new int[N]();
+    sizes_ = new int[N / K]();
     num_partitions_found_ = 0;
+  }
+  ~PartitionGenerator() {
+    delete[] partition_;
+    delete[] sizes_;
   }
 
   // Recursive function takes a state in which balls 1 to n-1 have been placed
@@ -30,39 +34,40 @@ class PartitionGenerator {
       OutputPartition();
       return;
     }
+    // Bins are [0 to K-1], [K to 2K-1], [2K to 3K-1], ...
     for (int i = 0; i < N / K; ++i) {
       // Cannot place into a full bin
-      if (partition_[i].size() == K) continue;
-      // Cannot skip an empty bin
-      if (i > 0 && partition_[i - 1].empty()) break;
-
-      partition_[i].push_back(n);
+      if (sizes_[i] == K) continue;
+      // Place in first empty slot in bin i
+      partition_[i * K + sizes_[i]] = n;
+      ++sizes_[i];
       GeneratePartitions(n + 1);
-      partition_[i].pop_back();
+      --sizes_[i];
+      // If this bin was empty, can't go to later bins
+      if (sizes_[i] == 0) break;
     }
   }
 
-  int NumPartitionsFound() { return num_partitions_found_; }
+  long long NumPartitionsFound() { return num_partitions_found_; }
 
  private:
   void OutputPartition() {
-    assert(partition_.size() == N / K);
     ++num_partitions_found_;
     if (!print_) return;
     for (int i = 0; i < N / K; ++i) {
-      assert(partition_[i].size() == K);
       std::cout << "{";
       for (int j = 0; j < K; ++j) {
-        std::cout << partition_[i][j] << (j == K - 1 ? "}" : ", ");
+        std::cout << partition_[i * K + j] << (j == K - 1 ? "}" : ", ");
       }
       if (i < N / K - 1) std::cout << ", ";
     }
     std::cout << std::endl;
   }
 
-  std::vector<std::vector<int> > partition_;
+  int* partition_;
+  int* sizes_;
   int N, K;
-  int num_partitions_found_;
+  long long num_partitions_found_;
   bool print_;
 };
 
