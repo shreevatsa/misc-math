@@ -4,6 +4,7 @@ The look-and-say sequence. Can we go backwards?
 For testing some heuristic (which turns out to be wrong).
 */
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <map>

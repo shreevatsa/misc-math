@@ -7,8 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   if (argc != 3) {
     printf("Usage: %s <number of buckets> <size of each bucket>\n", argv[0]);
     return 1;
@@ -20,9 +21,9 @@ int main(int argc, char** argv) {
   int ntrials, T, i;
   double sum_T = 0, sum_T_sq = 0;
   srandom(time(NULL));
-  for (ntrials = 1; ; ++ntrials) {
+  for (ntrials = 1;; ++ntrials) {
     for (i = 0; i < B; ++i) size[i] = 0;
-    for (T = 1; ; ++T) {
+    for (T = 1;; ++T) {
       int bucket = random() % B;
       ++size[bucket];
       if (size[bucket] > S) break;
