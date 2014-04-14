@@ -1,4 +1,4 @@
-// Given n, S, k, find n1 to nk, adding up to n, whose squares add up to k.
+// Given N, S, K, find K numbers that add up to N and whose squares add up to S.
 // (Brute force.)
 
 #include <vector>
@@ -25,8 +25,8 @@ void search(int i) {
     return;
   }
   if (i == K) {
-    if (csum != N) return;
-    if (ssum != S) return;
+    assert (csum == N);
+    assert (ssum == S);
     for (int j = 0; j < i; ++j) cout << a[j] << " ";
     cout << endl;
     return;
