@@ -19,6 +19,8 @@ def iterate(poss):
         for b in range(len(l)):
             if b == a: continue
             for op in [operator.add, operator.sub, operator.mul, operator.truediv]:
+                # Avoid dup
+                if op in [operator.add, operator.mul] and b < a: continue
                 if op == operator.truediv and value(l[b]) == 0: continue
                 v = op(value(l[a]), value(l[b]))
                 s = '(%s %s %s)' % (expr(l[a]), symbol(op), expr(l[b]))
