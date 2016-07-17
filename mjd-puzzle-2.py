@@ -761,7 +761,7 @@ def atom(value):
     return Expression(ATOM, None, None, Fraction(value))
 
 # print 'Start'
-start = (atom(2), atom(5), atom(6), atom(6))
+start = (atom(2), atom(21), atom(430), atom(8507))
 poss = set([start])   # four expressions
 poss = iterate(poss)  # at most three (in each possibility)
 poss = iterate(poss)  # at most two
@@ -785,7 +785,7 @@ def iterate_old(poss):
                 newposs.add(tuple(sorted(nl)))
   return newposs
 
-t = (Fraction(2), Fraction(5), Fraction(6), Fraction(6))
+t = (Fraction(2), Fraction(21), Fraction(430), Fraction(8507))
 poss_old = set([t])              # fours
 poss_old = iterate_old(poss_old) # threes
 poss_old = iterate_old(poss_old) # twos
