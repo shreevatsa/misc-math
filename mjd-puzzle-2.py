@@ -668,13 +668,13 @@ class Expression(object):
         if op_type in [ADD_SUB, MUL_DIV]:
             self.args_l = args_l
             self.args_r = args_r
-            self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(e.poss_reciprocal for e in args_l))
-            self.poss_negation   = (op_type == ADD_SUB and (args_r or all(e.poss_negation for e in args_l)) or
-                                    op_type == MUL_DIV and any(e.poss_negation for e in args_l + args_r))
+            # self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(e.poss_reciprocal for e in args_l))
+            # self.poss_negation   = (op_type == ADD_SUB and (args_r or all(e.poss_negation for e in args_l)) or
+            #                         op_type == MUL_DIV and any(e.poss_negation for e in args_l + args_r))
             self.value = self.compute_value()
         else:
-            self.poss_negation = False
-            self.poss_reciprocal = False
+            # self.poss_negation = False
+            # self.poss_reciprocal = False
             self.value = value
 
     def compute_value(self):
@@ -743,14 +743,14 @@ def iterate(poss):
                 # Avoid dividing by zero
                 if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
                     continue
-                # To avoid dupes: we avoid negative / small values on the right: a - (-b) = a + b
-                if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r) or
-                    operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_r)):
-                    continue
-                # And also on the left, when there is at least one nonnegative value on the left: a + (-b) = a - b
-                if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l) or
-                    operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_l) and any(e.value >= 1 for e in candidates_l)):
-                    continue
+                # # To avoid dupes: we avoid negative / small values on the right: a - (-b) = a + b
+                # if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r) or
+                #     operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_r)):
+                #     continue
+                # # And also on the left, when there is at least one nonnegative value on the left: a + (-b) = a - b
+                # if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l) or
+                #     operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_l) and any(e.value >= 1 for e in candidates_l)):
+                #     continue
                 new_e = Expression(operation, candidates_l, candidates_r)
                 new_l = tuple(sorted(others + [new_e]))
                 new_poss.add(new_l)
