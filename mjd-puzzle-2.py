@@ -753,33 +753,24 @@ def iterate(poss):
                     continue
                 new_e = Expression(operation, candidates_l, candidates_r, None)
                 new_l = tuple(sorted(others + [new_e]))
-                # seen = new_l in new_poss
                 new_poss.add(new_l)
-                # print 'Replacing expressions', ','.join(map(str, candidates_l)), ' and ', ','.join(map(str, candidates_r)), ' with ', str(new_e), ': gives', ' AND '.join(map(str, new_l)), '(seen: %s)' % seen
     return new_poss
 
 
 def atom(value):
     return Expression(ATOM, None, None, Fraction(value))
 
+print 'Start'
 start = (atom(2), atom(5), atom(6), atom(6))
 poss = set([start])
 
-def p():
-    for t in sorted(poss):
-        print ', '.join(map(str, t))
-
-print 'Start'
-p()
-
 print 'One'
 poss = iterate(poss)
-p()
 
 print 'two'
 poss = iterate(poss)
-p()
 
 print 'three'
 poss = iterate(poss)
-p()
+for t in sorted(poss):
+    print ', '.join(map(str, t))
