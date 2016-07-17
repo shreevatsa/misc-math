@@ -729,6 +729,9 @@ def iterate(poss):
                 if (operation == ADD_SUB and any(e.poss_negation and e < 0 for e in candidates_r) or
                     operation == MUL_DIV and any(e.poss_reciprocal and e < 1 for e in candidates_l)):
                     continue
+                # Avoid dividing by zero
+                if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
+                    continue
                 new_e = Expression(operation, candidates_l, candidates_r, None)
                 new_l = tuple(sorted(others + [new_e]))
                 new_poss.add(new_l)
