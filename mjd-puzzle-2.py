@@ -657,7 +657,7 @@ from copy import deepcopy
 import operator
 
 def product(iterable):
-    reduce(operator.mul, iterable, 1)
+    return reduce(operator.mul, iterable, 1)
 
 ADD_SUB = 'add/sub'
 MUL_DIV = 'mul/div'
