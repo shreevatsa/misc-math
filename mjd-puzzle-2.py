@@ -745,7 +745,8 @@ start = (atom(2), atom(5), atom(6), atom(6))
 poss = set([start])
 
 def p():
-    print '\n'.join(str(x) for x in list(sorted(poss)))
+    for t in sorted(poss):
+        print map(str, t)
 
 print 'Start'
 p()
