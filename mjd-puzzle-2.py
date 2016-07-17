@@ -669,8 +669,8 @@ class Expression(object):
         if op_type in [ADD_SUB, MUL_DIV]:
             self.args_l = deepcopy(args_l)
             self.args_r = deepcopy(args_r)
-            self.poss_negation   = op_type == ADD_SUB and (args_r or all(args_l.poss_negation))
-            self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(args_l.poss_reciprocal))
+            self.poss_negation   = op_type == ADD_SUB and (args_r or all(e.poss_negation for e in args_l))
+            self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(e.poss_reciprocal for e in args_l))
             self.value = self.compute_value()
         else:
             self.poss_negation = False
