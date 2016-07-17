@@ -656,8 +656,8 @@ from fractions import Fraction
 from copy import deepcopy
 import operator
 
-def product(iterable):
-    return reduce(operator.mul, iterable, 1)
+def product(factors):
+    return reduce(operator.mul, factors, 1)
 
 ADD_SUB = 'add/sub'
 MUL_DIV = 'mul/div'
@@ -764,21 +764,21 @@ def iterate(poss):
 def atom(value):
     return Expression(ATOM, None, None, Fraction(value))
 
-print 'Start'
+# print 'Start'
 start = (atom(2), atom(5), atom(6), atom(6))
 poss = set([start])
 
-print 'One'
+# print 'One'
 poss = iterate(poss)
 
-print 'two'
+# print 'two'
 poss = iterate(poss)
 
-print 'three'
+# print 'three'
 poss = iterate(poss)
 for t in sorted(poss):
     assert len(t) == 1
-    print ', '.join(map(str, t))
+    # print ', '.join(map(str, t))
 
 
 # Version 1 of the program, for comparison
@@ -799,19 +799,19 @@ def iterate_old(poss):
 t = (Fraction(2), Fraction(5), Fraction(6), Fraction(6))
 poss_old = set([t])
 
-print 'Old One'
+# print 'Old One'
 poss_old = iterate_old(poss_old)
-print 'Old Two'
+# print 'Old Two'
 poss_old = iterate_old(poss_old)
-print 'Old Three'
+# print 'Old Three'
 poss_old = iterate_old(poss_old)
 
 poss_new = set(t[0].value for t in poss)
 print len(poss_old), len(poss_new), len(poss)
-print 'Differences:'
+# print 'Differences:'
 for t in sorted(poss_old):
     assert len(t) == 1
     if t[0] not in poss_new:
         print t[0]
-print 'End differences'
+# print 'End differences'
 assert set(t[0] for t in poss_old) == poss_new
