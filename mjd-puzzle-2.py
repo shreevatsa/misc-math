@@ -744,9 +744,9 @@ def iterate(poss):
             for (candidates_l, candidates_r, others) in three_subsets(l):
                 if not candidates_l: continue
                 if len(candidates_l) == 1 and len(candidates_r) == 0: continue
-                # To avoid dupes: we avoid negative / small values on the right.
-                if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r) or
-                    operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_l)):
+                # To avoid dupes: we avoid negative / small values on the right *or* left
+                if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r + candidates_l) or
+                    operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_r + candidates_l)):
                     continue
                 # Avoid dividing by zero
                 if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
