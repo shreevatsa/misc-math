@@ -730,7 +730,7 @@ def iterate(poss):
                     operation == MUL_DIV and any(e.poss_reciprocal and e < 1 for e in candidates_l)):
                     continue
                 new_e = Expression(operation, candidates_l, candidates_r, None)
-                new_l = tuple(sorted(others + [e]))
+                new_l = tuple(sorted(others + [new_e]))
                 new_poss.add(new_l)
     return new_poss
 
