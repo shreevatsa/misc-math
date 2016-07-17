@@ -776,8 +776,12 @@ poss = iterate(poss)
 
 print 'three'
 poss = iterate(poss)
+last = None
 for t in sorted(poss):
     assert len(t) == 1
+    if last and t[0].value == last:
+        print 'Dupe:\t\t\t',
+    last = t[0].value
     print ', '.join(map(str, t))
 
 
