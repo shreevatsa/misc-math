@@ -737,13 +737,13 @@ def iterate(poss):
             new_poss.add(l)
             continue  # Nothing further to do here
         for operation in [ADD_SUB, MUL_DIV]:
-            # Cannot have an ADD_SUB parent of an ADD_SUB, etc.
-            if any(e.op_type == operation for e in l):
-                continue
             # Pick a nonempty subset for L, and a subset for R.
             for (candidates_l, candidates_r, others) in three_subsets(l):
                 if not candidates_l: continue
                 if len(candidates_l) == 1 and len(candidates_r) == 0: continue
+                # Cannot have an ADD_SUB parent of an ADD_SUB, etc.
+                if any(e.op_type == operation for e in candidates_l + candidates_r):
+                    continue
                 # To avoid dupes: we avoid negative / small values on the right: a - (-b) = a + b
                 if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r) or
                     operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_r)):
@@ -806,8 +806,10 @@ poss_old = iterate_old(poss_old)
 print 'Old Three'
 poss_old = iterate_old(poss_old)
 
+print 'Differences:'
 poss_new = set(t[0].value for t in poss)
 for t in sorted(poss_old):
     assert len(t) == 1
     if t[0] not in poss_new:
         print t[0]
+print 'End differences'
