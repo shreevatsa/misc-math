@@ -777,4 +777,37 @@ poss = iterate(poss)
 print 'three'
 poss = iterate(poss)
 for t in sorted(poss):
+    assert len(t) == 1
     print ', '.join(map(str, t))
+
+
+# Version 1 of the program, for comparison
+
+def iterate_old(poss):
+  newposs = set()
+  for l in poss:
+    for a in range(len(l)):
+        for b in range(len(l)):
+            if b == a: continue
+            for op in [operator.add, operator.sub, operator.mul, operator.truediv]:
+                if op == operator.truediv and l[b] == 0: continue
+                v = op(l[a], l[b])
+                nl = [v] + [l[x] for x in range(len(l)) if x not in [a, b]]
+                newposs.add(tuple(sorted(nl)))
+  return newposs
+
+t = (Fraction(2), Fraction(5), Fraction(6), Fraction(6))
+poss_old = set([t])
+
+print 'Old One'
+poss_old = iterate_old(poss_old)
+print 'Old Two'
+poss_old = iterate_old(poss_old)
+print 'Old Three'
+poss_old = iterate_old(poss_old)
+
+poss_new = set(t[0].value for t in poss)
+for t in sorted(poss_old):
+    assert len(t) == 1
+    if t[0] not in poss_new:
+        print t[0]
