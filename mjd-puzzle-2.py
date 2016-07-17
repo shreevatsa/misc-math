@@ -653,7 +653,6 @@ Repeat until there's only one number left.
 """
 
 from fractions import Fraction
-from copy import deepcopy
 import operator
 
 def product(factors):
@@ -667,8 +666,8 @@ class Expression(object):
     def __init__(self, op_type, args_l, args_r, value):
         self.op_type = op_type
         if op_type in [ADD_SUB, MUL_DIV]:
-            self.args_l = deepcopy(args_l)
-            self.args_r = deepcopy(args_r)
+            self.args_l = args_l
+            self.args_r = args_r
             self.poss_negation   = (op_type == ADD_SUB and (args_r or all(e.poss_negation for e in args_l)) or
                                     op_type == MUL_DIV and any(e.poss_negation for e in args_l + args_r))
             self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(e.poss_reciprocal for e in args_l))
