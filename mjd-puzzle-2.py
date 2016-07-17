@@ -685,19 +685,36 @@ class Expression(object):
         else:
             raise TypeError('No need to compute value of an atom.')
 
-    def __str__(self):
-        if self.op_type == ADD_SUB:
-            if self.args_r:
-                return '%s - (%s)' % (' + '.join(self.args_l), ' + '.join(self.args_r))
-            else:
-                return ' + '.join(self.args_l)
-        elif self.op_type == MUL_DIV:
-            if self.args_r:
-                return '%s / (%s)' % (' * '.join(self.args_l), ' * '.join(self.args_r))
-            else:
-                return ' * '.join(self.args_l)
+    def str_expr(self):
+        if self.op_type in [ADD_SUB, MUL_DIV]:
+            symbol = {ADD_SUB: ' + ', MUL_DIV: ' * '}[self.op_type]
+            inverse = {ADD_SUB: ' - ', MUL_DIV: ' / '}[self.op_type]
+            lhs = symbol.join([e.str_expr() if e.op_type == ATOM else '(%s)' % e.str_expr() for e in self.args_l])
+            rhs = symbol.join([e.str_expr() if e.op_type == ATOM else '(%s)' % e.str_expr() for e in self.args_r])
+            if not self.args_r:
+                return '%s' % lhs
+            if len(self.args_r) > 1:
+                rhs = '(%s)' % rhs
+            if len(self.args_l) > 1:
+                lhs = '(%s)' % lhs
+            return '%s%s%s' % (lhs, inverse, rhs)
         else:
             return str(self.value)
+
+    def __str__(self):
+        return '%s=%s' % (self.value, self.str_expr())
+
+    def __eq__(self, other):
+      return str(self) == str(other)
+
+    def __cmp__(self, other):
+        if self.value != other.value:
+            return cmp(self.value, other.value)
+        return cmp(str(self), str(other))
+
+    # For use in a set
+    def __hash__(self):
+        return hash(str(self))
 
 
 def three_subsets(l):
@@ -725,6 +742,7 @@ def iterate(poss):
             # Pick a nonempty subset for L, and a subset for R.
             for (candidates_l, candidates_r, others) in three_subsets(l):
                 if not candidates_l: continue
+                if len(candidates_l) == 1 and len(candidates_r) == 0: continue
                 # To avoid dupes: we avoid negative / small values on the right.
                 if (operation == ADD_SUB and any(e.poss_negation and e < 0 for e in candidates_r) or
                     operation == MUL_DIV and any(e.poss_reciprocal and e < 1 for e in candidates_l)):
@@ -734,7 +752,9 @@ def iterate(poss):
                     continue
                 new_e = Expression(operation, candidates_l, candidates_r, None)
                 new_l = tuple(sorted(others + [new_e]))
+                # seen = new_l in new_poss
                 new_poss.add(new_l)
+                # print 'Replacing expressions', ','.join(map(str, candidates_l)), ' and ', ','.join(map(str, candidates_r)), ' with ', str(new_e), ': gives', ' AND '.join(map(str, new_l)), '(seen: %s)' % seen
     return new_poss
 
 
@@ -746,7 +766,7 @@ poss = set([start])
 
 def p():
     for t in sorted(poss):
-        print map(str, t)
+        print ', '.join(map(str, t))
 
 print 'Start'
 p()
