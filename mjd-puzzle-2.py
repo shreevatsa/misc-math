@@ -661,6 +661,7 @@ def product(iterable):
 
 ADD_SUB = 'add/sub'
 MUL_DIV = 'mul/div'
+ATOM = 'atom'
 
 class Expression(object):
     def __init__(self, op_type, args_l, args_r, value):
@@ -674,7 +675,7 @@ class Expression(object):
         else:
             self.poss_negation = False
             self.poss_reciprocal = False
-            self.value = Fraction(value)
+            self.value = value
 
     def compute_value(self):
         if self.op_type == ADD_SUB:
@@ -720,7 +721,11 @@ def iterate(poss):
                 new_poss.add(new_l)
     return new_poss
 
-start = (Expression(2), Expression(5), Expression(6), Expression(6))
+
+def atom(value):
+    return Expression(ATOM, None, None, Fraction(value))
+
+start = (atom(2), atom(5), atom(6), atom(6))
 poss = set([start])
 
 def p():
