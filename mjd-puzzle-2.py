@@ -668,13 +668,13 @@ class Expression(object):
         if op_type in [ADD_SUB, MUL_DIV]:
             self.args_l = args_l
             self.args_r = args_r
-            # self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(e.poss_reciprocal for e in args_l))
-            # self.poss_negation   = (op_type == ADD_SUB and (args_r or all(e.poss_negation for e in args_l)) or
-            #                         op_type == MUL_DIV and any(e.poss_negation for e in args_l + args_r))
+            self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(e.poss_reciprocal for e in args_l))
+            self.poss_negation   = (op_type == ADD_SUB and (args_r or all(e.poss_negation for e in args_l)) or
+                                    op_type == MUL_DIV and any(e.poss_negation for e in args_l + args_r))
             self.value = self.compute_value()
         else:
-            # self.poss_negation = False
-            # self.poss_reciprocal = False
+            self.poss_negation = False
+            self.poss_reciprocal = False
             self.value = value
 
     def compute_value(self):
@@ -743,14 +743,14 @@ def iterate(poss):
                 # Avoid dividing by zero
                 if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
                     continue
-                # # To avoid dupes: we avoid negative / small values on the right: a - (-b) = a + b
-                # if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r) or
-                #     operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_r)):
-                #     continue
-                # # And also on the left, when there is at least one nonnegative value on the left: a + (-b) = a - b
-                # if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l) or
-                #     operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_l) and any(e.value >= 1 for e in candidates_l)):
-                #     continue
+                # To avoid dupes: we avoid negative / small values on the right: a - (-b) = a + b
+                if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r) or
+                    operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_r)):
+                    continue
+                # And also on the left, when there is at least one nonnegative value on the left: a + (-b) = a - b
+                if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l) or
+                    operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_l) and any(e.value >= 1 for e in candidates_l)):
+                    continue
                 new_e = Expression(operation, candidates_l, candidates_r)
                 new_l = tuple(sorted(others + [new_e]))
                 new_poss.add(new_l)
@@ -761,42 +761,55 @@ def atom(value):
     return Expression(ATOM, None, None, Fraction(value))
 
 # print 'Start'
-start = (atom(2), atom(21), atom(430), atom(8507))
+start = (atom(2),
+         atom(21),
+         atom(430),
+         atom(8507),
+         )
 poss = set([start])   # four expressions
 poss = iterate(poss)  # at most three (in each possibility)
 poss = iterate(poss)  # at most two
 poss = iterate(poss)  # at most one
+last = None
 for t in sorted(poss):
     assert len(t) == 1
-    # print ', '.join(map(str, t))
+    if last and t[0].value == last:
+        print 'Dupe:\t\t\t',
+    last = t[0].value
+    print ', '.join(map(str, t))
+print len(poss), len(set(t[0].value for t in poss))
 
 
-# Version 1 of the program, for comparison
-def iterate_old(poss):
-  newposs = set()
-  for l in poss:
-    for a in range(len(l)):
-        for b in range(len(l)):
-            if b == a: continue
-            for op in [operator.add, operator.sub, operator.mul, operator.truediv]:
-                if op == operator.truediv and l[b] == 0: continue
-                v = op(l[a], l[b])
-                nl = [v] + [l[x] for x in range(len(l)) if x not in [a, b]]
-                newposs.add(tuple(sorted(nl)))
-  return newposs
+# # Version 1 of the program, for comparison
+# def iterate_old(poss):
+#   newposs = set()
+#   for l in poss:
+#     for a in range(len(l)):
+#         for b in range(len(l)):
+#             if b == a: continue
+#             for op in [operator.add, operator.sub, operator.mul, operator.truediv]:
+#                 if op == operator.truediv and l[b] == 0: continue
+#                 v = op(l[a], l[b])
+#                 nl = [v] + [l[x] for x in range(len(l)) if x not in [a, b]]
+#                 newposs.add(tuple(sorted(nl)))
+#   return newposs
 
-t = (Fraction(2), Fraction(21), Fraction(430), Fraction(8507))
-poss_old = set([t])              # fours
-poss_old = iterate_old(poss_old) # threes
-poss_old = iterate_old(poss_old) # twos
-poss_old = iterate_old(poss_old) # ones
+# t = (Fraction(2),
+#      Fraction(21),
+#      Fraction(430),
+#      # Fraction(8507),
+#      )
+# poss_old = set([t])              # fours
+# poss_old = iterate_old(poss_old) # threes
+# poss_old = iterate_old(poss_old) # twos
+# poss_old = iterate_old(poss_old) # ones
 
-poss_new = set(t[0].value for t in poss)
-print len(poss_old), len(poss_new), len(poss)
-# print 'Differences:'
-for t in sorted(poss_old):
-    assert len(t) == 1
-    if t[0] not in poss_new:
-        print t[0]
-# print 'End differences'
-assert set(t[0] for t in poss_old) == poss_new
+# poss_new = set(t[0].value for t in poss)
+# print len(poss_old), len(poss_new), len(poss)
+# # print 'Differences:'
+# for t in sorted(poss_old):
+#     assert len(t) == 1
+#     if t[0] not in poss_new:
+#         print t[0]
+# # print 'End differences'
+# assert set(t[0] for t in poss_old) == poss_new
