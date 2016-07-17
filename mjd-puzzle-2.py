@@ -806,10 +806,12 @@ poss_old = iterate_old(poss_old)
 print 'Old Three'
 poss_old = iterate_old(poss_old)
 
-print 'Differences:'
 poss_new = set(t[0].value for t in poss)
+print len(poss_old), len(poss_new), len(poss)
+print 'Differences:'
 for t in sorted(poss_old):
     assert len(t) == 1
     if t[0] not in poss_new:
         print t[0]
 print 'End differences'
+assert set(t[0] for t in poss_old) == poss_new
