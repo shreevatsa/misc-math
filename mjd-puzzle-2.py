@@ -699,6 +699,19 @@ class Expression(object):
         else:
             return str(self.value)
 
+
+def three_subsets(l):
+    """Partition l into three subsets. Each element has 3 choices"""
+    if len(l) == 0:
+        yield ([], [], [])
+        return
+    for (a, b, c) in three_subsets(l[:-1]):
+        last = l[-1]
+        yield (a + [last], b, c)
+        yield (a, b + [last], c)
+        yield (a, b, c + [last])
+
+
 def iterate(poss):
     new_poss = set()
     for l in poss:
