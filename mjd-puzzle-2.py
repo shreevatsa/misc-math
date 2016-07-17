@@ -663,14 +663,14 @@ MUL_DIV = 'mul/div'
 ATOM = 'atom'
 
 class Expression(object):
-    def __init__(self, op_type, args_l, args_r, value):
+    def __init__(self, op_type, args_l, args_r, value=None):
         self.op_type = op_type
         if op_type in [ADD_SUB, MUL_DIV]:
             self.args_l = args_l
             self.args_r = args_r
+            self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(e.poss_reciprocal for e in args_l))
             self.poss_negation   = (op_type == ADD_SUB and (args_r or all(e.poss_negation for e in args_l)) or
                                     op_type == MUL_DIV and any(e.poss_negation for e in args_l + args_r))
-            self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(e.poss_reciprocal for e in args_l))
             self.value = self.compute_value()
         else:
             self.poss_negation = False
@@ -686,20 +686,18 @@ class Expression(object):
             raise TypeError('No need to compute value of an atom.')
 
     def str_expr(self):
-        if self.op_type in [ADD_SUB, MUL_DIV]:
+        if self.op_type == ATOM:
+            return str(self.value)
+        else:
             symbol = {ADD_SUB: ' + ', MUL_DIV: ' * '}[self.op_type]
             inverse = {ADD_SUB: ' - ', MUL_DIV: ' / '}[self.op_type]
-            lhs = symbol.join([e.str_expr() if e.op_type == ATOM else '(%s)' % e.str_expr() for e in self.args_l])
-            rhs = symbol.join([e.str_expr() if e.op_type == ATOM else '(%s)' % e.str_expr() for e in self.args_r])
+            lhs = symbol.join([('%s' if e.op_type == ATOM else '(%s)') % e.str_expr() for e in self.args_l])
+            rhs = symbol.join([('%s' if e.op_type == ATOM else '(%s)') % e.str_expr() for e in self.args_r])
             if not self.args_r:
                 return '%s' % lhs
             if len(self.args_r) > 1:
                 rhs = '(%s)' % rhs
-            if len(self.args_l) > 1:
-                lhs = '(%s)' % lhs
             return '%s%s%s' % (lhs, inverse, rhs)
-        else:
-            return str(self.value)
 
     def __str__(self):
         return '%s=%s' % (self.value, self.str_expr())
@@ -718,7 +716,7 @@ class Expression(object):
 
 
 def three_subsets(l):
-    """Partition l into three subsets. Each element has 3 choices"""
+    """Yields all ways of partitioning l into three subsets."""
     if len(l) == 0:
         yield ([], [], [])
         return
@@ -736,12 +734,14 @@ def iterate(poss):
             new_poss.add(l)
             continue  # Nothing further to do here
         for operation in [ADD_SUB, MUL_DIV]:
-            # Pick a nonempty subset for L, and a subset for R.
             for (candidates_l, candidates_r, others) in three_subsets(l):
                 if not candidates_l: continue
                 if len(candidates_l) == 1 and len(candidates_r) == 0: continue
                 # Cannot have an ADD_SUB parent of an ADD_SUB, etc.
                 if any(e.op_type == operation for e in candidates_l + candidates_r):
+                    continue
+                # Avoid dividing by zero
+                if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
                     continue
                 # To avoid dupes: we avoid negative / small values on the right: a - (-b) = a + b
                 if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r) or
@@ -751,10 +751,7 @@ def iterate(poss):
                 if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l) or
                     operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_l) and any(e.value >= 1 for e in candidates_l)):
                     continue
-                # Avoid dividing by zero
-                if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
-                    continue
-                new_e = Expression(operation, candidates_l, candidates_r, None)
+                new_e = Expression(operation, candidates_l, candidates_r)
                 new_l = tuple(sorted(others + [new_e]))
                 new_poss.add(new_l)
     return new_poss
@@ -765,23 +762,16 @@ def atom(value):
 
 # print 'Start'
 start = (atom(2), atom(5), atom(6), atom(6))
-poss = set([start])
-
-# print 'One'
-poss = iterate(poss)
-
-# print 'two'
-poss = iterate(poss)
-
-# print 'three'
-poss = iterate(poss)
+poss = set([start])   # four expressions
+poss = iterate(poss)  # at most three (in each possibility)
+poss = iterate(poss)  # at most two
+poss = iterate(poss)  # at most one
 for t in sorted(poss):
     assert len(t) == 1
     # print ', '.join(map(str, t))
 
 
 # Version 1 of the program, for comparison
-
 def iterate_old(poss):
   newposs = set()
   for l in poss:
@@ -796,14 +786,10 @@ def iterate_old(poss):
   return newposs
 
 t = (Fraction(2), Fraction(5), Fraction(6), Fraction(6))
-poss_old = set([t])
-
-# print 'Old One'
-poss_old = iterate_old(poss_old)
-# print 'Old Two'
-poss_old = iterate_old(poss_old)
-# print 'Old Three'
-poss_old = iterate_old(poss_old)
+poss_old = set([t])              # fours
+poss_old = iterate_old(poss_old) # threes
+poss_old = iterate_old(poss_old) # twos
+poss_old = iterate_old(poss_old) # ones
 
 poss_new = set(t[0].value for t in poss)
 print len(poss_old), len(poss_new), len(poss)
