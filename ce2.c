@@ -1,9 +1,10 @@
-/*Code to count number of non-equivilent expression with n variables
- */
+/* Code to count number of non-equivalent expressions with n variables */
 #include <stdio.h>
 #include <gmp.h>
-#define N 201
-mpz_t SC[N];///Count of number start from multiplication or sum
+
+#define N 10
+
+mpz_t SC[N]; // Count of number start from multiplication or sum
 mpz_t SA[N];
 mpz_t SC1[N];
 mpz_t SA1[N];
@@ -12,30 +13,29 @@ mpz_t p2m1[N];
 int ind[N];
 
 
-void get_comb(int n, int g, mpz_t comb)
-{
-    int i,c;
+void get_comb(int n, int g, mpz_t comb) {
+    int i, c;
     mpz_t tmp;
     mpz_init(tmp);
     mpz_set(comb,fact[n]);
     c=0;
-    do{
+    do {
         int t,k,j;
-        for(i=c+1;i<g;i++){
-            if(ind[i]!=ind[c])
+        for(i = c + 1; i < g; i++) {
+            if(ind[i] != ind[c])
                 break;
-        }///c to i-1 is same
-        t=ind[c];
-        k=i-c;
+        } // c to i-1 is same
+        t = ind[c];
+        k = i - c;
 #ifdef TRACE
-        fprintf(stderr,"k=%d,t=%d,fact[%d]=",k,t,t*k);
-        mpz_out_str(stderr,10,fact[t*k]);
-        fprintf(stderr,"\n");
+        fprintf(stderr, "k=%d,t=%d,fact[%d]=", k, t, t * k);
+        mpz_out_str(stderr, 10, fact[t*k]);
+        fprintf(stderr, "\n");
 #endif
-        for(j=0;j<k;j++)mpz_div(comb,comb,fact[t]);
-        mpz_div(comb,comb,fact[k]);
-        c=i;
-    }while(c<g);
+        for(j=0; j<k; j++) mpz_div(comb, comb, fact[t]);
+        mpz_div(comb, comb, fact[k]);
+        c = i;
+    } while(c<g);
 #ifdef TRACE
     fprintf(stderr,"comb(%d,%d)=",n,g);
     mpz_out_str(stderr,10,comb);
@@ -87,7 +87,7 @@ void accum(int n, int g)
     mpz_out_str(stderr,10,tmp4);
 #endif
     mpz_add(SC1[n],SC1[n],tmp);
-    
+
     mpz_set_ui(tmp,1);
     for(i=0;i<g;i++){
         mpz_mul(tmp,tmp,SC[ind[i]]);
@@ -213,4 +213,3 @@ int main()
     for(i=2;i<N;i++)
         count(i);
 }
-
