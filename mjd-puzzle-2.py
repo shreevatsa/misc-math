@@ -784,12 +784,12 @@ def iterate(poss):
             new_poss.add(l)
             continue  # Nothing further to do here
         for operation in [ADD_SUB, MUL_DIV]:
-            for (candidates_l, candidates_r, others) in three_subsets(l):
+            # Cannot have an ADD_SUB parent of an ADD_SUB, or a MUL_DIV parent of a MUL_DIV
+            candidates = [e for e in l if e.op_type != operation]
+            non_candidates = [e for e in l if e.op_type == operation]
+            for (candidates_l, candidates_r, others) in three_subsets(candidates):
                 if not candidates_l: continue
                 if len(candidates_l) == 1 and len(candidates_r) == 0: continue
-                # Cannot have an ADD_SUB parent of an ADD_SUB, or a MUL_DIV parent of a MUL_DIV
-                if any(e.op_type == operation for e in candidates_l + candidates_r):
-                    continue
                 # Avoid dividing by zero
                 if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
                     continue
@@ -797,7 +797,7 @@ def iterate(poss):
                 if operation == ADD_SUB and candidates_r and candidates_r < candidates_l:
                     continue
                 new_e = Expression(operation, candidates_l, candidates_r)
-                new_l = tuple(sorted(others + [new_e]))
+                new_l = tuple(sorted(non_candidates + others + [new_e]))
                 new_poss.add(new_l)
     return new_poss
 
