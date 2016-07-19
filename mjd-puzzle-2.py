@@ -681,12 +681,9 @@ class Expression(object):
             self.args_l = args_l
             self.args_r = args_r
             self.value = self.compute_value()
-            if is_negation:
-                return
-            self.negation = self.create_negation()
         else:
-            self.negation = None
             self.value = value
+        self.negation = None if is_negation else self.create_negation()
 
     def create_negation(self):
         """Given an Expression `self`, returns its negation if it is negatable. Does not mutate self."""
@@ -703,26 +700,26 @@ class Expression(object):
                         first = e.negation
                     else:
                         rest.append(e)
+                assert first
                 return Expression(self.op_type, [first], rest, is_negation=True)
-        elif self.op_type == MUL_DIV:
-            if any(e.negation for e in self.args_l + self.args_r):
-                new_args_l = []
-                new_args_r = []
-                negated_yet = False
-                for e in self.args_l:
-                    if not negated_yet and e.negation:
-                        new_args_l.append(e.negation)
-                        negated_yet = True
-                    else:
-                        new_args_l.append(e)
-                for e in self.args_r:
-                    if not negated_yet and e.negation:
-                        new_args_r.append(e.negation)
-                        negated_yet = True
-                    else:
-                        new_args_r.append(e)
-                assert(negated_yet)
-                return Expression(self.op_type, new_args_l, new_args_r, is_negation=True)
+        elif self.op_type == MUL_DIV and any(e.negation for e in self.args_l + self.args_r):
+            new_args_l = []
+            new_args_r = []
+            negated_yet = False
+            for e in self.args_l:
+                if not negated_yet and e.negation:
+                    new_args_l.append(e.negation)
+                    negated_yet = True
+                else:
+                    new_args_l.append(e)
+            for e in self.args_r:
+                if not negated_yet and e.negation:
+                    new_args_r.append(e.negation)
+                    negated_yet = True
+                else:
+                    new_args_r.append(e)
+            assert(negated_yet)
+            return Expression(self.op_type, new_args_l, new_args_r, is_negation=True)
         return None
 
 
@@ -750,7 +747,7 @@ class Expression(object):
             return '%s%s%s' % (lhs, inverse, rhs)
 
     def __str__(self):
-        return '%s' % self.str_expr()
+        return self.str_expr()
 
     def __eq__(self, other):
       return str(self) == str(other)
@@ -875,4 +872,5 @@ def compare(values):
     assert poss_values == poss_new_values
 
 
-compare([2, 21, 430, 8607])
+compare([2, 5, 6, 6])
+# compare([2, 21, 430, 8607])
