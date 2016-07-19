@@ -807,11 +807,11 @@ start = (atom(2),
          atom(21),
          atom(430),
          atom(8507),
+         atom(16999),
          )
 poss = set([start])   # four expressions
-poss = iterate(poss)  # at most three (in each possibility)
-poss = iterate(poss)  # at most two
-poss = iterate(poss)  # at most one
+for _ in range(len(start) - 1):
+    poss = iterate(poss)
 last = None
 actual_poss = set()
 for t in sorted(poss):
