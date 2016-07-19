@@ -807,9 +807,7 @@ def atom(value):
 
 def all_expressions_new(values):
     start = tuple(atom(v) for v in values)
-    print start
     poss = set([start])   # four expressions
-    print poss
     for _ in range(len(start) - 1):
         poss = iterate(poss)
         print [map(str, l) for l in poss]
