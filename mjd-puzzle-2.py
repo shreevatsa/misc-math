@@ -787,18 +787,15 @@ def iterate(poss):
             for (candidates_l, candidates_r, others) in three_subsets(l):
                 if not candidates_l: continue
                 if len(candidates_l) == 1 and len(candidates_r) == 0: continue
-                # Cannot have an ADD_SUB parent of an ADD_SUB, etc.
+                # Cannot have an ADD_SUB parent of an ADD_SUB, or a MUL_DIV parent of a MUL_DIV
                 if any(e.op_type == operation for e in candidates_l + candidates_r):
                     continue
                 # Avoid dividing by zero
                 if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
                     continue
-                # To avoid dupes: we avoid negative values on the right: a - (c-b)/d = a + (b-c)/d
+                # To avoid dupes, we keep only one of each pair of negatives: never both e1 - e2 and e2 - e1.
                 if operation == ADD_SUB and candidates_r and candidates_r < candidates_l:
                     continue
-                # # And also on the left, when there is at least one nonnegative value on the left: a + (-b) = a - b
-                # if operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l):
-                #     continue
                 new_e = Expression(operation, candidates_l, candidates_r)
                 new_l = tuple(sorted(others + [new_e]))
                 new_poss.add(new_l)
@@ -808,7 +805,6 @@ def iterate(poss):
 def atom(value):
     return Expression(ATOM, None, None, Fraction(value))
 
-# print 'Start'
 start = (atom(2),
          atom(5),
          atom(6),
