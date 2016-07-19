@@ -805,37 +805,38 @@ def iterate(poss):
 def atom(value):
     return Expression(ATOM, None, None, Fraction(value))
 
-start = (atom(2),
-         atom(5),
-         atom(6),
-         atom(6),
-         )
-poss = set([start])   # four expressions
-for _ in range(len(start) - 1):
-    poss = iterate(poss)
-    print [map(str, l) for l in poss]
-    print
-    print
-
-actual_poss = set()
-for t in sorted(poss):
-    assert len(t) == 1
-    t = t[0]
-    actual_poss.add(t)
-    if t.negation:
-        actual_poss.add(t.negation)
-        assert t.negation.value == -t.value
-
-last = None
-for t in sorted(actual_poss):
-    print '%s \t= %s' % (t.value, t),
-    if last and t.value == last:
-        print '\t <- Dupe'
-    else:
+def all_expressions_new(values):
+    start = tuple(atom(v) for v in values)
+    print start
+    poss = set([start])   # four expressions
+    print poss
+    for _ in range(len(start) - 1):
+        poss = iterate(poss)
+        print [map(str, l) for l in poss]
         print
-    last = t.value
+        print
 
-print len(poss), len(actual_poss), len(set(t.value for t in actual_poss))
+    actual_poss = set()
+    for t in sorted(poss):
+        assert len(t) == 1
+        t = t[0]
+        actual_poss.add(t)
+        if t.negation:
+            actual_poss.add(t.negation)
+            assert t.negation.value == -t.value
+
+    last = None
+    for t in sorted(actual_poss):
+        print '%s \t= %s' % (t.value, t),
+        if last and t.value == last:
+            print '\t <- Dupe'
+        else:
+            print
+        last = t.value
+
+    print len(poss), len(actual_poss), len(set(t.value for t in actual_poss))
+
+all_expressions_new([2, 5, 6, 6])
 
 # # Version 1 of the program, for comparison
 # def iterate_old(poss):
