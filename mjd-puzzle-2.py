@@ -657,10 +657,10 @@ Thus we keep only canonical forms (say a-b and c-d, never b-a or d-c), and in an
 
 Thus any mul-div like xyz or xy/z is negatable if at least one of the factors is negatable.
 
-Can a - (b - c) happen? Can a / (c / d)? No, we don't have add-sub child of add-sub, or mul-div child of mul-div.
+Can a - (b - c) happen? Can a / (c / d)? No, we don't have add-sub child of add-sub, or mul-div child of mul-div. What can happen is a - (c-b)/d = a + (b-c)/d.
 
-a / (c / d)
-
+Example of what's missed out:
+-25 = ((8507 - 2) / 21) - 430
 
 """
 
@@ -680,7 +680,7 @@ class Expression(object):
         if op_type in [ADD_SUB, MUL_DIV]:
             self.args_l = args_l
             self.args_r = args_r
-            self.poss_negation   = (op_type == ADD_SUB and (args_r or all(e.poss_negation for e in args_l)) or
+            self.poss_negation   = (op_type == ADD_SUB and (args_r or any(e.poss_negation for e in args_l)) or
                                     op_type == MUL_DIV and any(e.poss_negation for e in args_l + args_r))
             self.value = self.compute_value()
         else:
@@ -753,12 +753,12 @@ def iterate(poss):
                 # Avoid dividing by zero
                 if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
                     continue
-                # To avoid dupes: we avoid negative / small values on the right: a - (-b) = a + b
-                if operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r):
+                # To avoid dupes: we avoid negative values on the right: a - (c-b)/d = a + (b-c)/d
+                if operation == ADD_SUB and candidates_r and candidates_r < candidates_l:
                     continue
-                # And also on the left, when there is at least one nonnegative value on the left: a + (-b) = a - b
-                if operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l):
-                    continue
+                # # And also on the left, when there is at least one nonnegative value on the left: a + (-b) = a - b
+                # if operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l):
+                #     continue
                 new_e = Expression(operation, candidates_l, candidates_r)
                 new_l = tuple(sorted(others + [new_e]))
                 new_poss.add(new_l)
@@ -779,14 +779,22 @@ poss = iterate(poss)  # at most three (in each possibility)
 poss = iterate(poss)  # at most two
 poss = iterate(poss)  # at most one
 last = None
+actual_poss = set()
 for t in sorted(poss):
     assert len(t) == 1
-    if last and t[0].value == last:
+    t = t[0]
+    if last and t.value == last:
         print 'Dupe:\t\t\t',
-    last = t[0].value
-    print ', '.join(map(str, t))
-print len(poss), len(set(t[0].value for t in poss))
-
+        assert False
+    last = t.value
+    print t
+    actual_poss.add(t)
+    if t.poss_negation:
+        from copy import copy
+        negt = copy(t)
+        negt.value = - t.value
+        actual_poss.add(negt)
+print len(poss), len(set(t[0].value for t in poss)), len(actual_poss)
 
 # # Version 1 of the program, for comparison
 # def iterate_old(poss):
