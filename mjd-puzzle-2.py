@@ -804,28 +804,29 @@ def atom(value):
 
 # print 'Start'
 start = (atom(2),
-         atom(21),
-         atom(430),
-         atom(8507),
-         atom(16999),
+         atom(5),
+         atom(6),
+         atom(6),
          )
 poss = set([start])   # four expressions
 for _ in range(len(start) - 1):
     poss = iterate(poss)
-last = None
+
 actual_poss = set()
 for t in sorted(poss):
     assert len(t) == 1
     t = t[0]
-    if last and t.value == last:
-        print 'Dupe:\t\t\t',
-        assert False
-    last = t.value
-    print t
     actual_poss.add(t)
     if t.negation:
         actual_poss.add(t.negation)
         assert t.negation.value == -t.value
+
+last = None
+for t in sorted(actual_poss):
+    if last and t.value == last:
+        print 'Dupe:\t\t\t',
+    last = t.value
+    print t
 print len(poss), len(actual_poss), len(set(t.value for t in actual_poss))
 
 # # Version 1 of the program, for comparison
