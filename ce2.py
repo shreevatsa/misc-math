@@ -59,7 +59,7 @@ def get_comb(n, g):
 #ifdef TRACE
         print 'k=%d,t=%d,fact[%d]=' % (k, t, t * k), fact[t * k]
 #endif
-        for j in range(k): comb /= fact[t] # comb /= (fact[t] ** k)
+        comb /= (fact[t] ** k)
         comb /= fact[k]
         c = i
         if c >= g:
@@ -70,8 +70,6 @@ def get_comb(n, g):
     return comb
 
 def accum(n, g):
-    tmp2 = 0
-    tmp4 = 0
 #ifdef TRACE
     print '%d = %s' % (n, '+'.join(str(ind[i]) for i in range(g)))
 #endif
@@ -144,14 +142,14 @@ def count(n):
     SA1[n] = 0
     for g in range(2, n + 1):
         count_group(n, g)
-    s = 2 * SC[n] + 2 * SA[n] - SC1[n] - SA1[n]
-    print 'C[%d]=' % n, s
+    s = 2 * SC[n] - SC1[n] + 2 * SA[n] - SA1[n]
 #ifdef TRACE
     print 'SC[%d] =' % n, SC[n]
     print 'SC1[%d] =' % n, SC1[n]
     print 'SA[%d] =' % n, SA[n]
     print 'SA1[%d] =' % n, SA1[n]
 #endif
+    print 'C[%d] =' % n, s
 
 
 def init():
@@ -161,10 +159,9 @@ def init():
     for i in range(2, N):
         fact[i] = fact[i - 1] * i
         p2m1[i] = (2 ** i) - 1
-    print fact
-    print p2m1
 
 if __name__ == '__main__':
     init()
     for i in range(2, N):
         count(i)
+        print '\n\n\n\n'
