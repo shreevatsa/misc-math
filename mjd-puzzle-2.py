@@ -683,43 +683,48 @@ class Expression(object):
             self.value = self.compute_value()
             if is_negation:
                 return
-            self.negation = None
-            if op_type == ADD_SUB:
-                if args_r:
-                    # x - y -> y - x
-                    self.negation = Expression(op_type, args_r, args_l, is_negation=True)
-                elif any(e.negation for e in args_l):
-                    # x + (-y) + z -> y - (x + z)
-                    first = None
-                    rest = []
-                    for e in args_l:
-                        if first is None and e.negation:
-                            first = e.negation
-                        else:
-                            rest.append(e)
-                    self.negation = Expression(op_type, [first], rest, is_negation=True)
-            elif op_type == MUL_DIV:
-                if any(e.negation for e in args_l + args_r):
-                    new_args_l = []
-                    new_args_r = []
-                    negated_yet = False
-                    for e in args_l:
-                        if not negated_yet and e.negation:
-                            new_args_l.append(e.negation)
-                            negated_yet = True
-                        else:
-                            new_args_l.append(e)
-                    for e in args_r:
-                        if not negated_yet and e.negation:
-                            new_args_r.append(e.negation)
-                            negated_yet = True
-                        else:
-                            new_args_r.append(e)
-                    assert(negated_yet)
-                    self.negation = Expression(op_type, new_args_l, new_args_r, is_negation=True)
+            self.negation = self.create_negation()
         else:
             self.negation = None
             self.value = value
+
+    def create_negation(self):
+        """Given an Expression `self`, returns its negation if it is negatable. Does not mutate self."""
+        if self.op_type == ADD_SUB:
+            if self.args_r:
+                # x - y -> y - x
+                return Expression(self.op_type, self.args_r, self.args_l, is_negation=True)
+            elif any(e.negation for e in self.args_l):
+                # x + (-y) + z -> y - (x + z)
+                first = None
+                rest = []
+                for e in self.args_l:
+                    if first is None and e.negation:
+                        first = e.negation
+                    else:
+                        rest.append(e)
+                return Expression(self.op_type, [first], rest, is_negation=True)
+        elif self.op_type == MUL_DIV:
+            if any(e.negation for e in self.args_l + self.args_r):
+                new_args_l = []
+                new_args_r = []
+                negated_yet = False
+                for e in self.args_l:
+                    if not negated_yet and e.negation:
+                        new_args_l.append(e.negation)
+                        negated_yet = True
+                    else:
+                        new_args_l.append(e)
+                for e in self.args_r:
+                    if not negated_yet and e.negation:
+                        new_args_r.append(e.negation)
+                        negated_yet = True
+                    else:
+                        new_args_r.append(e)
+                assert(negated_yet)
+                return Expression(self.op_type, new_args_l, new_args_r, is_negation=True)
+        return None
+
 
     def compute_value(self):
         if self.op_type == ADD_SUB:
@@ -728,6 +733,7 @@ class Expression(object):
             return product(e.value for e in self.args_l) / product(e.value for e in self.args_r)
         else:
             raise TypeError('No need to compute value of an atom.')
+
 
     def str_expr(self):
         if self.op_type == ATOM:
@@ -744,7 +750,7 @@ class Expression(object):
             return '%s%s%s' % (lhs, inverse, rhs)
 
     def __str__(self):
-        return '%s=%s' % (self.value, self.str_expr())
+        return '%s' % self.str_expr()
 
     def __eq__(self, other):
       return str(self) == str(other)
@@ -811,6 +817,9 @@ start = (atom(2),
 poss = set([start])   # four expressions
 for _ in range(len(start) - 1):
     poss = iterate(poss)
+    print [map(str, l) for l in poss]
+    print
+    print
 
 actual_poss = set()
 for t in sorted(poss):
@@ -823,10 +832,13 @@ for t in sorted(poss):
 
 last = None
 for t in sorted(actual_poss):
+    print '%s \t= %s' % (t.value, t),
     if last and t.value == last:
-        print 'Dupe:\t\t\t',
+        print '\t <- Dupe'
+    else:
+        print
     last = t.value
-    print t
+
 print len(poss), len(actual_poss), len(set(t.value for t in actual_poss))
 
 # # Version 1 of the program, for comparison
