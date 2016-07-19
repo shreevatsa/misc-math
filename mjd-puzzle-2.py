@@ -835,39 +835,46 @@ def all_expressions_new(values):
         last = t.value
 
     print len(poss), len(actual_poss), len(set(t.value for t in actual_poss))
+    return actual_poss
 
-all_expressions_new([2, 5, 6, 6])
+# Version 1 of the program, for comparison
+def iterate_old(poss):
+  newposs = set()
+  for l in poss:
+    for a in range(len(l)):
+        for b in range(len(l)):
+            if b == a: continue
+            for op in [operator.add, operator.sub, operator.mul, operator.truediv]:
+                if op == operator.truediv and l[b] == 0: continue
+                v = op(l[a], l[b])
+                nl = [v] + [l[x] for x in range(len(l)) if x not in [a, b]]
+                newposs.add(tuple(sorted(nl)))
+  return newposs
 
-# # Version 1 of the program, for comparison
-# def iterate_old(poss):
-#   newposs = set()
-#   for l in poss:
-#     for a in range(len(l)):
-#         for b in range(len(l)):
-#             if b == a: continue
-#             for op in [operator.add, operator.sub, operator.mul, operator.truediv]:
-#                 if op == operator.truediv and l[b] == 0: continue
-#                 v = op(l[a], l[b])
-#                 nl = [v] + [l[x] for x in range(len(l)) if x not in [a, b]]
-#                 newposs.add(tuple(sorted(nl)))
-#   return newposs
+def all_expressions_old(values):
+    start = tuple(Fraction(v) for v in values)
+    poss = set([start])
+    for _ in range(len(start) - 1):
+        poss = iterate_old(poss)
+    return poss
 
-# t = (Fraction(2),
-#      Fraction(21),
-#      Fraction(430),
-#      # Fraction(8507),
-#      )
-# poss_old = set([t])              # fours
-# poss_old = iterate_old(poss_old) # threes
-# poss_old = iterate_old(poss_old) # twos
-# poss_old = iterate_old(poss_old) # ones
+def compare(values):
+    poss_new = all_expressions_new(values)
+    poss = all_expressions_old(values)
 
-# poss_new = set(t[0].value for t in poss)
-# print len(poss_old), len(poss_new), len(poss)
-# # print 'Differences:'
-# for t in sorted(poss_old):
-#     assert len(t) == 1
-#     if t[0] not in poss_new:
-#         print t[0]
-# # print 'End differences'
-# assert set(t[0] for t in poss_old) == poss_new
+    poss_new_values = set(t.value for t in poss_new)
+    poss_values = set(t[0] for t in poss)
+    print 'Distinct expressions:', len(poss), len(poss_new)
+    print 'Distinct values:', len(poss_values), len(poss_new_values)
+    for t in sorted(poss):
+        assert len(t) == 1
+        v = t[0]
+        if v not in poss_new_values:
+            print 'Only old: ', v
+    for v in sorted(poss_new_values):
+        if v not in poss_values:
+            print 'Only new: ', v
+    assert poss_values == poss_new_values
+
+
+compare([2, 21, 430, 8607])
