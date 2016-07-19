@@ -685,6 +685,7 @@ class Expression(object):
             self.value = value
         self.negation = None if is_negation else self.create_negation()
 
+
     def create_negation(self):
         """Given an Expression `self`, returns its negation if it is negatable. Does not mutate self."""
         if self.op_type == ADD_SUB:
@@ -746,11 +747,12 @@ class Expression(object):
                 rhs = '(%s)' % rhs
             return '%s%s%s' % (lhs, inverse, rhs)
 
+
     def __str__(self):
         return self.str_expr()
 
     def __eq__(self, other):
-      return str(self) == str(other)
+        return str(self) == str(other)
 
     def __cmp__(self, other):
         if self.value != other.value:
@@ -775,6 +777,7 @@ def three_subsets(l):
 
 
 def iterate(poss):
+    """Given a set of lists of expressions, generates a new set of lists of expressions."""
     new_poss = set()
     for l in poss:
         if len(l) == 1:
