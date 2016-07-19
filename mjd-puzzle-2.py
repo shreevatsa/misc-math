@@ -675,16 +675,50 @@ MUL_DIV = 'mul/div'
 ATOM = 'atom'
 
 class Expression(object):
-    def __init__(self, op_type, args_l, args_r, value=None):
+    def __init__(self, op_type, args_l, args_r, value=None, is_negation=False):
         self.op_type = op_type
         if op_type in [ADD_SUB, MUL_DIV]:
             self.args_l = args_l
             self.args_r = args_r
-            self.poss_negation   = (op_type == ADD_SUB and (args_r or any(e.poss_negation for e in args_l)) or
-                                    op_type == MUL_DIV and any(e.poss_negation for e in args_l + args_r))
             self.value = self.compute_value()
+            if is_negation:
+                return
+            self.negation = None
+            if op_type == ADD_SUB:
+                if args_r:
+                    # x - y -> y - x
+                    self.negation = Expression(op_type, args_r, args_l, is_negation=True)
+                elif any(e.negation for e in args_l):
+                    # x + (-y) + z -> y - (x + z)
+                    first = None
+                    rest = []
+                    for e in args_l:
+                        if first is None and e.negation:
+                            first = e.negation
+                        else:
+                            rest.append(e)
+                    self.negation = Expression(op_type, [first], rest, is_negation=True)
+            elif op_type == MUL_DIV:
+                if any(e.negation for e in args_l + args_r):
+                    new_args_l = []
+                    new_args_r = []
+                    negated_yet = False
+                    for e in args_l:
+                        if not negated_yet and e.negation:
+                            new_args_l.append(e.negation)
+                            negated_yet = True
+                        else:
+                            new_args_l.append(e)
+                    for e in args_r:
+                        if not negated_yet and e.negation:
+                            new_args_r.append(e.negation)
+                            negated_yet = True
+                        else:
+                            new_args_r.append(e)
+                    assert(negated_yet)
+                    self.negation = Expression(op_type, new_args_l, new_args_r, is_negation=True)
         else:
-            self.poss_negation = False
+            self.negation = None
             self.value = value
 
     def compute_value(self):
@@ -789,12 +823,10 @@ for t in sorted(poss):
     last = t.value
     print t
     actual_poss.add(t)
-    if t.poss_negation:
-        from copy import copy
-        negt = copy(t)
-        negt.value = - t.value
-        actual_poss.add(negt)
-print len(poss), len(set(t[0].value for t in poss)), len(actual_poss)
+    if t.negation:
+        actual_poss.add(t.negation)
+        assert t.negation.value == -t.value
+print len(poss), len(actual_poss), len(set(t.value for t in actual_poss))
 
 # # Version 1 of the program, for comparison
 # def iterate_old(poss):
