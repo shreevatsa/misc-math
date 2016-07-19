@@ -650,6 +650,18 @@ Given a list of numbers (or, in general, expressions), repeatedly:
 
 Repeat until there's only one number left.
 
+[Wrote the below program, see git history of this file.]
+
+After trying a little to understand the Chinese program, one idea I have to address this (a-b)/(c-d) = (b-a)/(d-c) duplicates problem is to coult negations as simply a doubling.
+Thus we keep only canonical forms (say a-b and c-d, never b-a or d-c), and in any expression, simply record that the negation is possible.
+
+Thus any mul-div like xyz or xy/z is negatable if at least one of the factors is negatable.
+
+Can a - (b - c) happen? Can a / (c / d)? No, we don't have add-sub child of add-sub, or mul-div child of mul-div.
+
+a / (c / d)
+
+
 """
 
 from fractions import Fraction
@@ -668,13 +680,11 @@ class Expression(object):
         if op_type in [ADD_SUB, MUL_DIV]:
             self.args_l = args_l
             self.args_r = args_r
-            self.poss_reciprocal = op_type == MUL_DIV and (args_r or all(e.poss_reciprocal for e in args_l))
             self.poss_negation   = (op_type == ADD_SUB and (args_r or all(e.poss_negation for e in args_l)) or
                                     op_type == MUL_DIV and any(e.poss_negation for e in args_l + args_r))
             self.value = self.compute_value()
         else:
             self.poss_negation = False
-            self.poss_reciprocal = False
             self.value = value
 
     def compute_value(self):
@@ -744,12 +754,10 @@ def iterate(poss):
                 if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
                     continue
                 # To avoid dupes: we avoid negative / small values on the right: a - (-b) = a + b
-                if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r) or
-                    operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_r)):
+                if operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_r):
                     continue
                 # And also on the left, when there is at least one nonnegative value on the left: a + (-b) = a - b
-                if (operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l) or
-                    operation == MUL_DIV and any(e.poss_reciprocal and e.value < 1 for e in candidates_l) and any(e.value >= 1 for e in candidates_l)):
+                if operation == ADD_SUB and any(e.poss_negation and e.value < 0 for e in candidates_l) and any(e.value >= 0 for e in candidates_l):
                     continue
                 new_e = Expression(operation, candidates_l, candidates_r)
                 new_l = tuple(sorted(others + [new_e]))
