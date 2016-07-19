@@ -764,6 +764,10 @@ class Expression(object):
         return hash(str(self))
 
 
+def atom(value):
+    return Expression(ATOM, None, None, Fraction(value))
+
+
 def three_subsets(l):
     """Yields all ways of partitioning l into three subsets."""
     if len(l) == 0:
@@ -802,40 +806,39 @@ def iterate(poss):
     return new_poss
 
 
-def atom(value):
-    return Expression(ATOM, None, None, Fraction(value))
-
 def all_expressions_new(values):
     start = tuple(atom(v) for v in values)
-    poss = set([start])   # four expressions
+    poss = set([start])
     for _ in range(len(start) - 1):
         poss = iterate(poss)
         print [map(str, l) for l in poss]
         print
         print
 
+    # Include the left-out negations as well.
     actual_poss = set()
     for t in sorted(poss):
         assert len(t) == 1
-        t = t[0]
-        actual_poss.add(t)
-        if t.negation:
-            actual_poss.add(t.negation)
-            assert t.negation.value == -t.value
+        e = t[0]
+        actual_poss.add(e)
+        if e.negation:
+            actual_poss.add(e.negation)
+            assert e.negation.value == -e.value
 
+    # Print them out in sorted order, highlighting "dupes"
     last = None
-    for t in sorted(actual_poss):
-        print '%s \t= %s' % (t.value, t),
-        if last and t.value == last:
+    for e in sorted(actual_poss):
+        print '%s \t= %s' % (e.value, e),
+        if last and e.value == last:
             print '\t <- Dupe'
         else:
             print
-        last = t.value
+        last = e.value
 
-    print len(poss), len(actual_poss), len(set(t.value for t in actual_poss))
+    print 'Without negations:', len(poss), 'Including negations:', len(actual_poss), 'Distinct values:', len(set(e.value for e in actual_poss))
     return actual_poss
 
-# Version 1 of the program, for comparison
+# Old version of the program, for comparison
 def iterate_old(poss):
   newposs = set()
   for l in poss:
@@ -849,31 +852,33 @@ def iterate_old(poss):
                 newposs.add(tuple(sorted(nl)))
   return newposs
 
-def all_expressions_old(values):
+
+def all_values_old(values):
     start = tuple(Fraction(v) for v in values)
     poss = set([start])
     for _ in range(len(start) - 1):
         poss = iterate_old(poss)
-    return poss
+    values = set()
+    for t in poss:
+        assert len(t) == 1
+        values.add(t[0])
+    # Print counts
+    print '(Old) number of values:', len(poss), '=', len(values)
+    return values
+
 
 def compare(values):
-    poss_new = all_expressions_new(values)
-    poss = all_expressions_old(values)
-
-    poss_new_values = set(t.value for t in poss_new)
-    poss_values = set(t[0] for t in poss)
-    print 'Distinct expressions:', len(poss), len(poss_new)
-    print 'Distinct values:', len(poss_values), len(poss_new_values)
-    for t in sorted(poss):
-        assert len(t) == 1
-        v = t[0]
-        if v not in poss_new_values:
+    expressions_new = all_expressions_new(values)
+    values_old = all_values_old(values)
+    values_new = set(t.value for t in expressions_new)
+    for v in sorted(values_old):
+        if v not in values_new:
             print 'Only old: ', v
-    for v in sorted(poss_new_values):
-        if v not in poss_values:
+    for v in sorted(values_new):
+        if v not in values_old:
             print 'Only new: ', v
-    assert poss_values == poss_new_values
+    assert values_old == values_new
 
 
-compare([2, 5, 6, 6])
-# compare([2, 21, 430, 8607])
+# compare([2, 5, 6, 6])
+compare([2, 21, 430, 8607])
