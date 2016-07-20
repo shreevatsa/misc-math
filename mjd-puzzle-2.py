@@ -780,7 +780,7 @@ def three_subsets(l):
         yield (a, b, c + [last])
 
 
-def iterate_v1(poss):
+def iterate(poss):
     """Given a set of lists of expressions, generates a new set of lists of expressions."""
     new_poss = set()
     for l in poss:
@@ -805,31 +805,6 @@ def iterate_v1(poss):
                 new_poss.add(new_l)
     return new_poss
 
-
-def iterate_v2(poss):
-    """Given a set of lists of expressions, generates a new set of lists of expressions."""
-    new_poss = set()
-    for l in poss:
-        if len(l) == 1:
-            new_poss.add(l)
-            continue  # Nothing further to do here
-        for operation in [ADD_SUB, MUL_DIV]:
-            # Cannot have an ADD_SUB parent of an ADD_SUB, or a MUL_DIV parent of a MUL_DIV
-            candidates = [e for e in l if e.op_type != operation]
-            non_candidates = [e for e in l if e.op_type == operation]
-            for (candidates_l, candidates_r, others) in three_subsets(candidates):
-                if not candidates_l: continue
-                if len(candidates_l) == 1 and len(candidates_r) == 0: continue
-                # Avoid dividing by zero
-                if operation == MUL_DIV and any(e.value == 0 for e in candidates_r):
-                    continue
-                # To avoid dupes, we keep only one of each pair of negatives: never both e1 - e2 and e2 - e1.
-                if operation == ADD_SUB and candidates_r and candidates_r < candidates_l:
-                    continue
-                new_e = Expression(operation, candidates_l, candidates_r)
-                new_l = tuple(sorted(non_candidates + others + [new_e]))
-                new_poss.add(new_l)
-    return new_poss
 
 def all_expressions_new(values, iteration_function):
     start = tuple(atom(v) for v in values)
@@ -882,37 +857,17 @@ def all_values_old(values):
 
 def compare(values):
     print values
-    expressions_new = all_expressions_new(values, iterate_v1)
-    expressions_new_2 = all_expressions_new(values, iterate_v2)
+    expressions_new = all_expressions_new(values, iterate)
 
-    from collections import Counter
-    c = Counter()
-    for e in expressions_new:
-        c[e.value] += 1
-        # if e.value == 24:
-        #     print 'v1', e.value, '=', e
-    for e in expressions_new_2:
-        c[e.value] -= 1
-        # if e.value == 24:
-        #     print 'v2', e.value, '=', e
-    for i in c:
-        if c[i]:
-            print 'Diff:', i, 'counted', c[i], 'times'
-
-    # for (v, e) in sorted(only_v1):
-    #         print 'Only v1:', v, '=', e
-    # for (v, e) in sorted(only_v2):
-    #         print 'Only v2:', v, '=', e
-
-    # values_old = all_values_old(values)
-    # values_new = set(t.value for t in expressions_new)
-    # for v in sorted(values_old):
-    #     if v not in values_new:
-    #         print 'Only old: ', v
-    # for v in sorted(values_new):
-    #     if v not in values_old:
-    #         print 'Only new: ', v
-    # assert values_old == values_new
+    values_old = all_values_old(values)
+    values_new = set(t.value for t in expressions_new)
+    for v in sorted(values_old):
+        if v not in values_new:
+            print 'Only old: ', v
+    for v in sorted(values_new):
+        if v not in values_old:
+            print 'Only new: ', v
+    assert values_old == values_new
 
 
 compare([6, 6, 5, 2])
