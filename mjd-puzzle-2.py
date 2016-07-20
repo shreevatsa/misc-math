@@ -780,7 +780,7 @@ def three_subsets(l):
         yield (a, b, c + [last])
 
 
-def iterate(poss):
+def iterate_expressions(poss):
     """Given a set of lists of expressions, generates a new set of lists of expressions."""
     new_poss = set()
     for l in poss:
@@ -806,11 +806,11 @@ def iterate(poss):
     return new_poss
 
 
-def all_expressions_new(values, iteration_function):
+def all_expressions(values):
     start = tuple(atom(v) for v in values)
     poss = set([start])
     for _ in range(len(start) - 1):
-        poss = iteration_function(poss)
+        poss = iterate_expressions(poss)
 
     # Include the left-out negations as well.
     actual_poss = set()
@@ -827,7 +827,7 @@ def all_expressions_new(values, iteration_function):
 
 
 # Old version of the program, for comparison
-def iterate_old(poss):
+def iterate_values(poss):
   newposs = set()
   for l in poss:
     for a in range(len(l)):
@@ -841,11 +841,11 @@ def iterate_old(poss):
   return newposs
 
 
-def all_values_old(values):
+def all_values(values):
     start = tuple(Fraction(v) for v in values)
     poss = set([start])
     for _ in range(len(start) - 1):
-        poss = iterate_old(poss)
+        poss = iterate_values(poss)
     values = set()
     for t in poss:
         assert len(t) == 1
@@ -857,10 +857,9 @@ def all_values_old(values):
 
 def compare(values):
     print values
-    expressions_new = all_expressions_new(values, iterate)
-
-    values_old = all_values_old(values)
-    values_new = set(t.value for t in expressions_new)
+    expressions = all_expressions(values)
+    values_new = set(t.value for t in expressions)
+    values_old = all_values(values)
     for v in sorted(values_old):
         if v not in values_new:
             print 'Only old: ', v
