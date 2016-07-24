@@ -1,0 +1,424 @@
+# -*- truncate-lines: nil; -*-
+Our ultimate goal will to be count the number of inequivalent expressions on n symbols, using the binary operators of addition, subtraction, multiplication and division.
+
+* One operation: arbitrary
+
+Suppose we have a binary operation * (we assume nothing about it, neither associative nor commutative).
+
+We want to count $T_n$, the number of distinct expressions on $n$ symbols.
+
+On $n = 1$ symbols, there is only one expression: $a$. So $T_1 = 1$.
+
+On $n = 2$ symbols, there are two expressions: $a * b$ and $b * a$. So $T_2 = 2$.
+
+On $n = 3$ symbols, there are twelve expressions:
+
+<blockquote>
+<pre>
+      *          *          *          *          *          *
+    a   *      a   *      b   *      b   *      c   *      c   *
+       b c        c b        a c        c a        a b        b a
+
+
+      *          *          *          *          *          *
+    *   c      *   b      *   c      *   a      *   b      *   a
+   a b        a c        b a        b c        c a        c b
+</pre>
+</blockquote>
+
+So $T_3 = 12$. We can form these 12 expressions by first deciding whether the left subtree should have 1 or 2 symbols, then choosing on either side any of the possible expressions with those many symbols. This gives us the recurrence
+
+$$ T_n = \sum_{k=1}^{n-1} \binom{n}{k} T_k T_{n-k}$$
+
+and the sequence $T_1, T_2, T_3, T_4, \dots$ as $1, 2, 12, 120, 1680, 30240, 665280, \dots$.
+
+https://oeis.org/A001813
+
+The general term has expression $T_n = {(2n-1)! \over (n-1)!}$, which we can probably prove by induction (haven't tried it).
+
+Another way to prove it is to note that the number of expressions on $n$ symbols is $n!$ times the number of distinct binary trees having $n-1$ internal nodes and $n$ leaves, which is the Catalan number $C_{n-1} = {(2n-1)! \over (n-1)!n!}$.
+
+We can also prove it by defining the exponential generating function
+
+$$T(z) = T_1 z + T_2 {z^2 \over 2!} + T_3 {z^3 \over 3!} + \dots$$
+
+and noticing that $T(z)^2 = T(z) - T_1z$, which we can write as $T(z)^2 - T(z) + z = 0$, and solve as a quadratic equation to get
+
+$$T(z) = \frac{1 - \sqrt{1 - 4z}}{2}$$
+
+which is the same as $z$ times the *ordinary* generating function of the Catalan numbers (as expected).
+
+(In case it's of any interest, note that $T'(z) = {1 \over \sqrt{1 - 4z}}$, the EGF for ${(2n)! \over n!}$.)
+
+We could have also got this directly with the "symbolic method" of Flajolet and Sedgewick: any labelled binary tree is either a single node, or two labelled binary trees put together. So if we denote the class of all labelled binary trees by $\mathcal{T}$ we have
+
+$$\mathcal{T} = \mathcal{Z} + \mathcal{T}\star\mathcal{T}$$
+
+so the exponential generating function $T(z)$ satisfies
+
+$$T(z) = z + T(z)^2$$
+
+as before.
+
+
+* One operation: commutative
+
+Now suppose the operation is commutative (but not associative), so that $a * b = b * a$. Let's call the number of expressions $U_n$.
+
+On $n = 1$ symbols, there is only one expression: $a$. So $U_1 = 1$.
+
+On $n = 2$ symbols, there is still only one expression: $a * b$ (which is the same as $b * a$). So $U_2 = 1$ as well.
+
+On $n = 3$ symbols, there are three expressions:
+<blockquote>
+<pre>
+      *              *              *
+   a     *        b     *        c     *
+        b c            a c            a b
+</pre>
+</blockquote>
+which correspond to $a*(b*c)$, $b*(a*c)$ and $c*(a*b)$ respectively. So $U_3 = 3$.
+
+On $n = 4$ symbols, the number of expressions is $U_4 = 15$.
+
+(a) + (b, c, d) --> 4 * 3
+(a, b) + (c, d) --> 3 * 1
+
+On $n = 5$ symbols, the number of expressions is $U_5 = 105$.
+
+(a) + (b, c, d, e) --> 5 * 15
+(a, b) + (c, d, e) --> 10 * 3
+
+We can calculate this as follows:
+
+$$U_n = {1 \over 2} \sum_{k=1}^{n-1} \binom{n}{k} U_k U_{n-k}$$
+(the ${1 \over 2}$ is so that we don't double-count).
+
+iPython:
+U = [0, 1]
+n = len(U); U.append(sum(comb(n,k)*U[k]*U[n-k] for k in range(1, n))/2)
+# Repeat the above line as many times as you want, to extend the list.
+
+The sequence is 1, 1, 3, 15, 105, 945, 10395, 135135, ...
+
+https://oeis.org/A001147
+
+The general term is $U_n = (2n-1)!! = 1 \times 3 \times 5 \times \dots \times (2n-1)$.
+
+Again, you can probably prove this by induction (either with the recurrence or combinatorially in terms of the structure), but we can also prove it by defining
+
+$$U(z) = U_1z + U_2{z^2 \over 2!} + U_3{z^3 \over 3!} + \dots$$
+
+and noticing that $U(z)^2 = 2U(z) - 2U_1z$ which we can rewrite as $U(z)^2 - 2U(z) + 2z = 0$ and solve as a quadratic equation to get $U(z) = 1 - \sqrt{1 - 2z}$.
+
+Directly by the symbolic method: any object of this type (unordered labelled binary trees) is either a single node, or a set of two such objects put together (in any order), so denoting the class of all unordered labelled binary trees by $\mathcal{U}$ we have
+
+$$\mathcal{U} = \mathcal{Z} + \textsc{Set}_2(\mathcal{U})$$
+
+so, directly,
+
+$$U(z) = z + {U(z)^2 \over 2!}$$
+
+as before.
+
+
+* One operation: associative
+
+We can extend in a different direction: assume an arbitrary associative operation that is not commutative.
+
+Then on $n = 1$ symbol, there is only one expression: $a$.
+
+On $n = 2$ symbols, there are two expressions: $a * b$ and $b * a$.
+
+On $n = 3$ symbols, of the twelve expressions we had noted earlier, only six are distinct:
+<blockquote>
+<pre>
+      *          *          *          *          *          *
+    a   *      a   *      b   *      b   *      c   *      c   *
+       b c        c b        a c        c a        a b        b a
+
+
+      *          *          *          *          *          *
+    *   c      *   b      *   c      *   a      *   b      *   a
+   a b        a c        b a        b c        c a        c b
+</pre>
+</blockquote>
+as each one is equal to the one below it. Thus there are $3! = 6$ expressions.
+
+In general, by associativity, the tree structure does not matter and only the order of the symbols matters. So on $n$ symbols there are as many distinct expressions as the number of permutations on $n$ symbols, which is $n!$.
+
+
+* One operation: both associative and commutative
+
+E.g. the operation could be addition, or multiplication.
+
+In this case there is only one expression on $n$ symbols, for any $n$. For instance for $n = 3$, $a * b * c = b * a * c = c * a * b$ etc.
+
+
+* One associative-commutative operation, and its inverse
+
+Now we have two operations, e.g. addition and subtraction, or multiplication and division. For simplicity let us denote the operations by $+$ and $-$.
+
+Because of associativity the tree structure again does not matter. Note that, for instance, $a - (b - c) = a + b - c$ so we can always get rid of brackets.
+
+On $n = 1$ symbol, there is one expression: $a$.
+
+On $n = 2$ symbols there are three expressions: $a + b$, $a - b$ and $b - a$.
+
+On $n = 3$ symbols there are 7 expressions:
+<blockquote>
+<pre>
+a + b + c
+a + b - c
+a + c - b
+b + c - a
+a - b - c
+b - a - c
+c - a - b
+</pre>
+</blockquote>
+
+In general, on $n$ symbols there are $2^n - 1$ expressions.
+
+There are two ways to count this. My way of thinking, as in the example above, is to say: any expression has a "positive" side and a (possibly) empty "negative" side. For the positive side, we can choose any nonempty subset, and there are $2^n - 1$ of them. (Equivalently, for the negative side we can choose any subset other than the full set, giving the same count.)
+
+Another way of counting these, which I learned/inferred from the program by Zhao Hui Du (see previous post or https://oeis.org/A140606), is to count them as:
+
+<blockquote>
+<pre>
+a + b + c
+a + b - c    and    c - a - b
+a - b + c    and    b - a - c
+a - b - c    and    b + c - a
+</pre>
+</blockquote>
+
+where we pair each element with its additive inverse (negative), except of course the all-addition one. First, keeping the order of the symbols fixed, there are $2^{n-1}$ choices of signs for each of the elements other than the first one. Now for all (except one) of those choices we have an additive inverse as well, giving the count $2^{n-1} + (2^{n-1} - 1)$ which is the same as $2^n - 1$.
+
+
+* Addition and multiplication
+
+Now it gets interesting.
+
+On $n = 1$ symbol, there is one expression: $a$.
+
+On $n = 2$ symbols, there are two expressions: $a + b$ and $ab$.
+
+On $n = 3$ symbols, there are $8$ expressions:
+<blockquote>
+<pre>
+a + b + c
+a + bc
+b + ac
+c + ab
+a(b + c)
+b(a + c)
+c(a + b)
+abc
+</pre>
+</blockquote>
+
+On $n = 4$ symbols, there are $52$ expressions:
+<blockquote>
+<pre>
+a + b + c + d
+
+a + b + cd
+a + c + bd
+a + d + bc
+b + c + ad
+b + d + ac
+c + d + ab
+
+ab(c + d)
+ac(b + d)
+ad(b + c)
+bc(a + d)
+bd(a + c)
+cd(a + b)
+
+a + b(c + d) etc. (12 of them)
+
+a(b + cd) etc. (12 of them)
+
+ab + cd
+ac + bd
+ad + bc
+
+(a + b)(c + d)
+(a + c)(b + d)
+(a + d)(b + c)
+
+a + bcd
+b + acd
+c + abd
+d + abc
+
+a(b + c + d)
+b(a + c + d)
+c(a + b + d)
+d(a + b + c)
+
+abcd
+</pre>
+</blockquote>
+
+How do we count these? One way is to count them by what the "top-level" expression is: whether it is an addition or a multiplication.
+
+On $n = 1$ symbol, there is one expression $a$ which we can call either additive or multiplicative, but it seems cleanest (for further computation) to call it neither.
+
+On $n = 2$ symbols, additive expressions: $a + b$ (count $1$), multiplicative expressions: $ab$ (count $1$).
+
+On $n = 3$ symbols, additive expressions: $a + b + c, a + bc, b + ac, c + ab$ (count $4$), multiplicative expressions: $abc, a(b + c), b(a + c), c(a + b)$ (count $4$).
+
+On $n = 4$ symbols, let's count the additive expressions by the number of symbols in each part being added (their order doesn't matter, as addition is associative and commutative). The symbols can be partitioned as $1 + 1 + 1 + 1$ or $1 + 1 + 2$ or $1 + 3$ or $2 + 2$. (Each partition of $4$.) None of these parts can be an additive expression itself, for then we could "pull up" this additive expression to the top level. (E.g. $a + b + (c + d)$ partitioned as $1 + 1 + 2$ is the same as $a + b + c + d$ already counted in the partition $1 + 1 + 1 + 1$).
+
+If a part has $1$ symbol there is only possible form of expression. On $2$ symbols too, there is only one possible form of multiplicative expression $ab$ (if the symbols in it are $a$ and $b$). On $3$ symbols, as we saw, there are $4$ multiplicative expressions.
+
+For each partition, we also need to account for the number of ways of partitioning a set of four elements into parts of those sizes. For example, for the partition $2 + 2$, there are $6$ ways of partitioning a set of $4$ elements into sets of size $2$ and $2$ (we don't care about the order between the two sets).
+
+So we could count the additive expressions on $n = 4$ by partition as follows:
+
+<blockquote>
+<pre>
+Partition          Number of expressions
+1 + 1 + 1 + 1        1 * 1 * 1 * 1 * (1)
+1 + 1 + 2            1 * 1 * 1 * (6)
+1 + 3                1 * 4 * (4)  -> this counts both 4 expressions like a + bcd and 12 like a + b(c+d).
+2 + 2                1 * 1 * (3)
+1 + 6 + 16 + 3 = 26
+</pre>
+</blockquote>
+
+So there are $26$ additive expressions on $4$ symbols, which we can denote by $A_4 = 26$.
+
+We get a similar count for the number of multiplicative expressions, namely $M_4 = A_4 = 26$. So the total number of expressions on $4$ symbols is $52$, as enumerated earlier.
+
+In terms of the tree structure, each expression can be thought of as an $n$-ary tree, with alternating additions and multiplications at each level.
+
+Thus, the $26$ additive expressions can be seen as (in the order of partitions above):
+<blockquote>
+<pre>
+      +
+   a b c d
+
+
+      +
+   a  b  *
+        c d
+
+
+
+      +                                +
+   a     *           and           a       *
+       b c d                             b   +
+                                            c d
+
+
+       +
+    *     *
+   a b   c d
+</pre>
+</blockquote>
+
+with 1, 12, 4 and 3
+
+
+Let's work out the number for $n = 5$.
+
+<blockquote>
+<pre>
+Partition                Number of additive expressions
+1 + 1 + 1 + 1 + 1        1 * 1 * 1 * 1 * 1 * (1)       = 1
+1 + 1 + 1 + 2            1 * 1 * 1 * M_2 * (10)        = 10
+1 + 1 + 3                1 * 1 * M_3 * (10)            = 40
+1 + 2 + 2                1 * M_2 * M_2 * (15)          = 15
+1 + 4                    1 * M_4 * (5)                 = 130
+2 + 3                    M_2 * M_3 * (10)              = 40
+</pre>
+</blockquote>
+
+Thus $A_5 = 1 + 10 + 40 + 15 + 130 + 40 = 236$, similarly $M_5 = 236$ and the number of expressions is $A_5 + M_5 = 472$.
+
+In general we can enumerate the number of additive expressions on $n$ symbols by picking each (number) partition of $n$, and for that partition, multiplying
+(1) the number of ways of (set) partitioning a set of $n$ elements into (unordered) subsets of those sizes, and
+(2) for each part size $k$, either the number of multiplicative expressions (if $k \ge 2$) or $1$ (if $k = 1$).
+
+This sequence $1, 2, 8, 52, 472, 5504, 78416, \dots$ is https://oeis.org/A006351. The sequence of just $A_n$ or $M_n$ is https://oeis.org/A000311 (for $n \ge 2$).
+
+Instead of counting by number of symbols (which leads to partitions), we could also alternatively count by tree depth. This is where the symbolic method really shines. Denoting by $\mathcal{A}$ the class of additive expressions and by $\mathcal{M}$ the class of multiplicative expressions, we have:
+
+- any additive expression involves adding together a set (at least two) of multiplicative expressions and individual symbols (atoms), so $\mathcal{A} = \textsc{Set}_{\ge 2}(\mathcal{M} + \mathcal{Z})$.
+- any multiplicative expression involves multiplying together a set (at least two) of additive expressions and atoms, so $\mathcal{M} = \textsc{Set}_{\ge 2}(\mathcal{A} + \mathcal{Z})$.
+
+With this we can prove that $\mathcal{A}$ and $\mathcal{M}$ are isomorphic, and therefore we could write
+
+$$\mathcal{A} = \textsc{Set}_{\ge 2}(\mathcal{A} + \mathcal{Z})$$
+
+giving, for the exponential generating function $A(z)$, the expression
+
+$$A(z) = \exp(A(z) + z) - 1 - (A(z) + z)$$
+
+or
+
+$$\exp(A(z) + z) = 2A(z) + z + 1$$
+
+which can be used to calculate the terms $A_n$.
+
+If writing a program to generate all expressions, we can take either approach:
+
+- Approach 1: Generate the expressions on $n$ symbols separately for each $n$, by generating the partitions, and for each partition using the expressions for each smaller $n$ (and relabelling them).
+- Approach 2: Generate the expressions with tree depth $1$ (atoms), then the ones with tree depth $2$ (a single binary operation), etc. By the time you have generated expressions with tree depth $n$ you'll have generated all expressions with $n$ symbols (and more).
+
+
+* Addition, subtraction, multiplication and division
+
+Finally we arrive at the problem we originally wanted to solve.
+
+Including both addition and subtraction, or both multiplication and division, means that we again have something like $2^k - 1$ choices in each addition-subtraction or each multiplication-division expression involving $k$ sub-expressions.
+
+Like having both addition and multiplication, again our expressions have the structure of n-ary trees with different classes of operation at alternating levels. That is, if an addition/subtraction expression is a child of another addition/subtraction, it can be "pulled up": e.g. if in $e_1 - e_2 + e_3 + e_4$ the expression $e_3$ is some $f_1 - f_2$, this is the same as $e_1 - e_2 + f_1 - f_2 + e_4$. Similarly if in $e_1 * e_2 / e_3 / e_4$ the expression $e_3$ is $f_1 / f_2 / f_3$ then this is the same as $e_1 * e_2 / f_1 * f_2 * f_3 / e_4$. So the levels of our expression tree alternate between addition-subtraction and multiplication-division.
+
+To avoid confusion with the terms from the previous section, we'll use $S_n$ to denote the number of expressions on $n$ symbols that are (at the top level) add/sub, and $D_n$ to denote the number that are mul/div.
+
+On $n = 1$ symbol, there is the single expression $a$.
+
+On $n = 2$ symbols, there are six expressions:
+<blockquote>
+<pre>
+a + b
+a - b and b - a
+a * b
+a / b and b / a
+</pre>
+</blockquote>
+So $S_2 = D_2 = 3$
+
+On $n = 3$ symbols, let's try to count the $68$ expressions.
+
+Expressions of the form $a + b$ (where one of them is a mul/div): $1 * D_2 * (3) = 9$ (because there are 3 ways of allocating one number to the atom and 2 to the mul/div).
+Just for clarity, these 9 are:
+<blockquote>
+<pre>
+a + bc   a + b/c   a + c/b
+b + ac   b + a/c   b + c/a
+c + ab   c + a/b   c + b/a
+</pre>
+</blockquote>
+
+Expressions of the form $a - b$ and $b - a$ (where one of them is a mul/div): $1 * D_2 * (6) = 18$.
+Here the mul/div can be assigned to either the "positive" top-level expression or the "negative" one, so there are twice as many.
+
+Expressions of the form $a + b + c$, $a + b - c$, etc.: $7$ of them (the $2^3 - 1$ that we calculated in an earlier section).
+
+Thus $S_3 = 9 + 18 + 7 = 34$. Similarly $D_3 = 34$ as well, giving a total count of $68$ expressions on $3$ symbols.
+
+When we get to $4$ symbols, there's an additional wrinkle. Let's first count $S_4$.
+
+Partitioning $4$ as $4 = 3 + 1$ we have $D_3 * 1 * (4)= 136$ expressions such as $abc + d$ or $a/(b+c) + d$. We further have the same number of expressions of the form $e_1 - e_2$ and $e_2 - e_1$, for a total of $136 * 3$ expressions for this partition.
+
+Partitioning $4$ as $4 = 2 + 2$ we have $D_2 * D_2 * (3) * S_2 = 81$ expressions (such as $ab - c/d$).
+
+Partitioning $4$ as $4 = 2 + 1 + 1$ we have $D_2 * 1 * 1 * (6) * A_3 = 18$ expressions.
+
+Partitioning $4$ as $1 + 1 + 1 + 1
