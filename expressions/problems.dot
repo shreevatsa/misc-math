@@ -1,0 +1,18 @@
+digraph {
+  arbitrary [label = "Arbitrary operation"];
+  commutative [label = "Commutative operation"];
+  associative [label = "Associative operation"];
+  basic [label = "Associative and commutative operation"];
+  addsub [label = "Addition and subtraction"];
+  addmul [label = "Addition and multiplication"];
+  all4 [label = "Addition, subtraction, multiplication, division"];
+
+  arbitrary -> commutative;
+  arbitrary -> associative;
+  commutative -> basic
+  associative -> basic;
+  basic -> addsub;
+  basic -> addmul;
+  addsub -> all4;
+  addmul -> all4;
+}
