@@ -1,9 +1,21 @@
 # -*- truncate-lines: nil; -*-
-Our ultimate goal will to be count the number of inequivalent expressions on n symbols, using the binary operators of addition, subtraction, multiplication and division.
 
-We'll get to there in stages, by considering many variants of this question.
+Our goal is to be count the number of inequivalent expressions on n symbols, using the binary operators of addition, subtraction, multiplication and division.
 
-(See problems.svg and sequences.svg)
+We'll get to there in stages, by considering many variants of this question first. Specifically:
+
+- How many expressions are there on $n$ symbols, using a single arbitrary binary operation?
+- How many if we assume the operation is commutative, or if we assume it is associative, or both?
+- [Note that a single operation both commutative and associative is like addition, or like multiplication.]
+- How many if we have both addition and subtraction, or both multiplication and division?
+- How many if we have both addition and multiplication?
+- Finally, how many if we have all four of addition, subtraction, multiplication and division?
+
+[Insert problems.svg]
+
+As a preview, here are the answers we'll find (number of expressions on $n = 1, 2, \dots$ symbols), for the above problems.
+
+[Insert sequences.svg]
 
 * One operation: arbitrary
 
@@ -16,6 +28,13 @@ On $n = 1$ symbols, there is only one expression: $a$. So $T_1 = 1$.
 On $n = 2$ symbols, there are two expressions: $a * b$ and $b * a$. So $T_2 = 2$.
 
 On $n = 3$ symbols, there are twelve expressions:
+#+BEGIN_EXAMPLE
+a * (b * c)    a * (c * b)    b * (a * c)    b * (c * a)    c * (a * b)    c * (b * a)
+(a * b) * c    (a * c) * b    (b * a) * c    (b * c) * a    (c * a) * b    (c * b) * a
+#+END_EXAMPLE
+
+*** Tree representation
+Any expression can be written as a tree, by taking the "top-level" operation and making it the root node, its left-hand-side input (itself an expression) represented as the left subtree, and its right-hand-side input as the right subtree. The leaves have the "atoms", or the bare symbols we started with. Thus the above 12 expressions can be denoted by these trees:
 
 <blockquote>
 <pre>
@@ -30,15 +49,44 @@ On $n = 3$ symbols, there are twelve expressions:
 </pre>
 </blockquote>
 
-So $T_3 = 12$. We can form these 12 expressions by first deciding whether the left subtree should have 1 or 2 symbols, then choosing on either side any of the possible expressions with those many symbols. This gives us the recurrence
+So $T_3 = 12$.
 
-$$ T_n = \sum_{k=1}^{n-1} \binom{n}{k} T_k T_{n-k}$$
+We can form these 12 expressions by first deciding which symbols go on the left and right, then choosing on either side any of the possible expressions with those symbols.
 
-and the sequence $T_1, T_2, T_3, T_4, \dots$ as $1, 2, 12, 120, 1680, 30240, 665280, 17297280 \dots$.
+*** Test of equivalence
+How can we say when two binary expressions are equivalent?
 
-https://oeis.org/A001813
+If they are both given in string representation (like =a * (b * c)=) then we just check whether the strings are the same.
 
-The general term has expression $T_n = {(2n-1)! \over (n-1)!}$, which we can probably prove by induction (haven't tried it).
+In terms of their structure, we can do the following:
+- Locate the top-level operation. (In other words: each of the expressions is itself is an application of the binary operator; locate the left and right inputs to that operator.)
+- Check whether the same symbols are on both sides, in the two expressions. (In other words: in each expression, the $n$ symbols are partitioned into two subsets, check whether the partitions are the same.)
+- Check whether both the left and right expressions are the same.
+
+(There's also a base case: two expressions that are atoms are equivalent if they are both the same symbol.)
+
+*** Canonical form
+As above, each expression can be canonically represented as a (plane) binary tree: each internal node is the operator and has two (ordered) children, and there are $n - 1$ internal nodes, and the $n$ external nodes (leaves) are labelled with the symbols we started with.
+
+(The string representation is also arguably a canonical form, but it is unstructured in the sense that it's that harder to talk of its parts.)
+
+*** Recursive structure
+Our observation on how the 12 expressions for $n = 3$ can be formed, or our test of equivalence above, give us a recursive structure for building an expression in terms of smaller expressions: given $n$ symbols, when $n > 1$ (when $n = 1$ the symbol itself is an expression), partition the set of $n$ symbols into a left side and a right side, form any expression with the two sides, and put them together with the binary operation.
+
+*** Recurrence
+This gives us the recurrence
+
+$$T_n = \sum_{k=1}^{n-1} \binom{n}{k} T_k T_{n-k}$$
+
+with which we can compute the values.
+
+*** Sequence
+This gives us the sequence $T_1, T_2, T_3, T_4, \dots$ as $1, 2, 12, 120, 1680, 30240, 665280, 17297280 \dots$.
+
+This is sequence https://oeis.org/A001813 on OEIS.
+
+*** Closed form
+The general term has expression $T_n = {(2n-1)! \over (n-1)!}$, which we can probably prove by induction using the recurrence (haven't tried it).
 
 Another way to prove it is to note that the number of expressions on $n$ symbols is $n!$ times the number of distinct binary trees having $n-1$ internal nodes and $n$ leaves, which is the Catalan number $C_{n-1} = {(2n-1)! \over (n-1)!n!}$.
 
@@ -46,18 +94,20 @@ We can also prove it by defining the exponential generating function
 
 $$T(z) = T_1 z + T_2 {z^2 \over 2!} + T_3 {z^3 \over 3!} + \dots$$
 
-and noticing that $T(z)^2 = T(z) - T_1z$, which we can write as $T(z)^2 - T(z) + z = 0$, and solve as a quadratic equation to get
+(we can say $T_0 = 0$) and noticing that our recurrence gives $T(z)^2 = T(z) - T_1z$, which we can write as $T(z)^2 - T(z) + z = 0$, and solve as a quadratic equation to get
 
 $$T(z) = \frac{1 - \sqrt{1 - 4z}}{2}$$
 
-which is the same as $z$ times the *ordinary* generating function of the Catalan numbers (as expected).
+which is the same as $z$ times the *ordinary* generating function of the Catalan numbers (as expected, because they differ by a factor of $n!$ after shifting the Catalan numbers by 1).
 
 (In case it's of any interest, note that $T'(z) = {1 \over \sqrt{1 - 4z}}$, the EGF for ${(2n)! \over n!}$.)
 
-We could have also got this directly with the "symbolic method" of Flajolet and Sedgewick: any labelled binary tree is either a single node, or two labelled binary trees put together. So if we denote the class of all labelled binary trees by $\mathcal{T}$ we have
+*** Symbolic method
+We could have also got all this directly with the "symbolic method" of Flajolet and Sedgewick: any expression is either a single atom, or two expressions put together in order (and relabelled). So if we denote the class of all expressions (or labelled binary trees as above) by $\mathcal{T}$ we have
 
 $$\mathcal{T} = \mathcal{Z} + \mathcal{T}\star\mathcal{T}$$
 
+(here the $\star$ denotes the operation of taking two labelled structures and putting them together, with relabelling)
 so the exponential generating function $T(z)$ satisfies
 
 $$T(z) = z + T(z)^2$$
