@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Knight&apos;s tour poem helper</title>
+    <style>
+      td {
+          border-spacing: 2px;
+          border-style: dotted;
+          border-width: thin;
+          border-color: grey;
+          width: 4em;
+      }
+      form li {
+          list-style: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Knight&apos;s Helper</h1>
+
+    <p>What you want to do: write two poems such that the first one read in a particular knight&apos;s tour order gives the other.</p>
+
+    <p>Pick the knight&apos;s tour you want:</p>
+    <form>
+      <ul>
+        <li><input type="radio" name="tour" value="rudrata" onclick="setTourType();" checked="true">Rudraṭa</li>
+        <li><input type="radio" name="tour" value="ratnakara" onclick="setTourType();">Ratnākara</li>
+        <li><input type="radio" name="tour" value="custom" onclick="setTourType();">Custom: <input type="text" value=""></li>
+      </ul>
+    </form>
+
+    <p>Selected: <span id="selectedTour"></span></p>
+
+    <div id="tablePair">
+    </div>
+
+    <script type="text/javascript">
+      function setChildren(domNode, children) {
+          while (domNode.hasChildNodes()) {
+              domNode.removeChild(domNode.firstChild);
+          }
+          for (let child of children) {
+              domNode.appendChild(child);
+          }
+      }
+
+      function setTourType() {
+          const tourType = document.querySelector('input[name="tour"]:checked').value;
+          console.log('Tour type is', tourType);
+          let tour = [];
+          if (tourType == 'rudrata') {
+              tour = [01, 30,  9, 20,  3, 24, 11, 26,
+                      16, 19,  2, 29, 10, 27,  4, 23,
+                      31,  8, 17, 14, 21,  6, 25, 12,
+                      18, 15, 32,  7, 28, 13, 22, 5];
+          } else if (tourType == 'ratnakara') {
+              tour = [26, 11, 24,  5, 20,  9, 30,  7,
+                      23,  4, 27, 10, 29,  6, 19, 16,
+                      12, 25,  2, 21, 14, 17,  8, 31,
+                      03, 22, 13, 28,  1, 32, 15, 18];
+          } else {
+              tour = [];
+          }
+          document.getElementById('selectedTour').textContent = tour;
+          const newTables = tablesForTour(tour);
+          const tablesDiv = document.getElementById('tablePair');
+          setChildren(tablesDiv, newTables);
+      }
+
+      function tableForPadya() {
+          const table = document.createElement('table');
+          let cells = [];
+          for (let line = 0; line < 4; ++line) {
+              const tr = document.createElement('tr');
+              for (let syllable = 0; syllable < 8; ++syllable) {
+                  const td = document.createElement('td');
+                  td.textContent = '';
+                  td.contentEditable = true;
+                  tr.appendChild(td);
+                  cells.push(td);
+              }
+              table.appendChild(tr);
+          }
+          return [table, cells];
+      }
+
+      function tablesForTour(tour) {
+          const [table1, cells1] = tableForPadya();
+          const [table2, cells2] = tableForPadya();
+
+          for (let i = 0; i < tour.length; ++i) {
+              cells1[i].mirror = cells2[tour[i] - 1];
+              cells2[tour[i] - 1].mirror = cells1[i];
+          }
+
+          for (let cell of cells1.concat(cells2)) {
+              cell.addEventListener('input', function() {
+                  cell.mirror.textContent = cell.textContent;
+              });
+          }
+
+          const filler = document.createElement('hr');
+          return [table1, filler, table2];
+      }
+      setTourType();
+    </script>
+  </body>
+</html>
