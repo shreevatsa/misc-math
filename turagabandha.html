@@ -91,11 +91,35 @@
 
           for (let i = 0; i < tour.length; ++i) {
               cells1[i].mirror = cells2[tour[i] - 1];
+              cells1[i].where = parseInt((i / 8) + 1) + ',' + ((i % 8) + 1);
               cells2[tour[i] - 1].mirror = cells1[i];
+              cells2[tour[i] - 1].where = cells1[i].where;
+              // cells1[i].textContent = cells2[tour[i] - 1].textContent = cells1[i].where;
           }
 
           for (let cell of cells1.concat(cells2)) {
+              /* Thanks to http://codebits.glennjones.net/editing/events-contenteditable.htm
+                 and http://stackoverflow.com/questions/10213703/how-do-i-view-events-fired-on-an-element-in-chrome-devtools */
               cell.addEventListener('input', function() {
+                  cell.mirror.textContent = cell.textContent;
+              });
+              ['mouseover', 'focus'].forEach(function(event) {
+                  cell.addEventListener(event, function() {
+                      cell.style.backgroundColor = cell.mirror.style.backgroundColor = 'lightblue';
+                  });
+              });
+              ['mouseleave', 'blur'].forEach(function(event) {
+                  cell.addEventListener(event, function() {
+                      cell.style.backgroundColor = '';
+                      cell.mirror.style.backgroundColor = '';
+                  });
+              });
+              cell.addEventListener('keydown', function(event) {
+                  if (event.key == 'Backspace') {
+                      // cell.textContent = cell.where;
+                      cell.textContent = '';
+                  }
+                  // Not sure why I need this?
                   cell.mirror.textContent = cell.textContent;
               });
           }
