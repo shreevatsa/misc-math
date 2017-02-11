@@ -46,6 +46,8 @@ def pair_partition_factorization(l):
     global results_count
     known_partitions = list(pair_partitions(l))
     print 'There are %d partitions' % len(known_partitions)
+    for i in range(len(known_partitions)):
+        print i, '-'.join(known_partitions[i])
     pair_used = defaultdict(lambda: False)
     results_count = 0
     find_partition_list(0, len(l) - 1)
