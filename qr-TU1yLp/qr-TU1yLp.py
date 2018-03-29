@@ -1,6 +1,7 @@
 import math
 import matplotlib
 import matplotlib.pyplot as plt
+import mpmath
 
 matplotlib.rc('text', usetex=True)
 
@@ -12,21 +13,29 @@ MAX_VALUE = 1000000000
 BIN_SIZE = MAX_VALUE / NUM_BINS
 assert len(of) == len(og) == NUM_BINS * 10
 
-f = [sum(int(of[i]) for i in range(n, n + 10)) for n in range(NUM_BINS)]
-g = [sum(int(og[i]) for i in range(n, n + 10)) for n in range(NUM_BINS)]
+fbins = [sum(int(of[i]) for i in range(n, n + 10)) for n in range(NUM_BINS)]
+f = []
+for i in range(len(fbins)): f.append(fbins[i] + (f[i-1] if i else 0))
+gbins = [sum(int(og[i]) for i in range(n, n + 10)) for n in range(NUM_BINS)]
+g = []
+for i in range(len(gbins)): g.append(gbins[i] + (g[i-1] if i else 0))
+
 ratios = [float(f[i])/float(g[i]) for i in range(len(f))]
 unscaled_logs = []
 for n in range(NUM_BINS):
     x = (n + 1) * BIN_SIZE
     y = x / math.log(x)
     x -= BIN_SIZE
-    y_prev = x/math.log(x) if n > 0 else 0
-    unscaled_logs.append(y - y_prev)
-gl = [y*1.25 for y in unscaled_logs]
+    y_prev = x / math.log(x) if n > 0 else 0
+    unscaled_logs.append(y)
+gl = [y*1.12 for y in unscaled_logs]
+
 flscaler = 2.79
 fl = [y*flscaler for y in unscaled_logs]
+fl = [mpmath.li((n + 1) * BIN_SIZE, offset=True) for n in range(NUM_BINS)]
 
 xs = range(1, NUM_BINS + 1)
+xs = [x*BIN_SIZE for x in xs]
 print('Done xs')
 
 fig, ax1 = plt.subplots()
@@ -42,11 +51,13 @@ ax1.set_ylim(ymin=0)
 ax1.set_xlim(xmin=0)
 ax1.legend([linef, linefl, lineg, linegl],
            ['$n^2 + 21n + 1$', r'$%.2f n / \ln(n)$' % flscaler, '$n^2 + n + 1$', r'$1.25 n / \ln(n)$'],
-           loc='upper right',
+           loc='upper left',
            # fontsize = 'small'
                )
 ax1.set_ylabel('Number of primes in bin')
 print('Done plotting ax1')
+
+print('Last value: ', g[-1])
 
 # print('Plotting ratio')
 # ax2 = ax1.twinx()

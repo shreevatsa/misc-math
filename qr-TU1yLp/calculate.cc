@@ -8,16 +8,7 @@ int main() {
       printf("%lld %.9f\n", p, ans);
     }
     if (!is_prime(p)) continue;
-    double mul = -1;
-    if (p % 3 == 1) mul = (p - 2.0) / (p - 1.0);
-    if (p % 3 == 2) mul = p / (p - 1.0);
-    if (p % 3 != 0) {
-      ans *= mul;
-      printf("%lld (%d) multiplying by %.2f to get %.9f\n", p, (p % 3), mul, ans);
-    }
+    if (p % 3 == 1) ans *= (p - 2.0) / (p - 1.0);
+    if (p % 3 == 2) ans *= p / (p - 1.0);
   }
 }
-
-
-
-
