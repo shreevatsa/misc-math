@@ -2,6 +2,7 @@
 """
 
 import fractions
+import math
 
 def residues_for(p): return set((x*x)%p for x in range(p)) - {0}
 residues = {
@@ -27,9 +28,6 @@ def knockout(p):
 # Slow version
 def slow_knockout(p, f): return sum(1 for n in range(p) if f(n) % p == 0)
 
-class MyFraction(fractions.Fraction):
-    pass
-
 class MyFraction():
     def __init__(self, num, den):
         self.num = num
@@ -43,6 +41,9 @@ class MyFraction():
         return MyFraction(self.num * other.den, self.den * other.num)
     def __str__(self):
         return '%s' % self.__float__()
+
+class MyFraction(fractions.Fraction):
+    pass
 
 def allowed_fraction(p):
     first, second = knockout(p)
@@ -77,4 +78,30 @@ def calc_As():
         if num_printed % 100 == 0:
             print n, float(total1), float(total2), float(total2 / total1)
 
-calc_As()
+# calc_As()
+
+def calc_111():
+    ans = MyFraction(1, 2)
+    n = 1
+    while True:
+        n += 1
+        if not is_prime(n): continue
+        ratio, _ = allowed_fraction(n)
+        ans *= ratio
+        print(n, '%s' % ratio, '%s' % ans)
+
+# calc_111()
+
+def calc_conrad():
+    ans = MyFraction(1, 2)
+    multiplier = math.sqrt(3) / math.log(2 + math.sqrt(3))
+    n = 1
+    while True:
+        n += 1
+        if not is_prime(n): continue
+        p = n
+        dp = [0, 1, -1][p % 3]
+        fac = (1 - MyFraction(dp, p - 1)) / (1 - MyFraction(dp, p))
+        ans *= fac
+        print(n, fac, float(ans * multiplier))
+calc_conrad()
