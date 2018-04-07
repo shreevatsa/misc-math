@@ -58,22 +58,28 @@ def fast_kp(p, a, b, c):
 
 def C(a, b, c):
     p = 1
-    ans = 1.0
+    C0 = 1.0
+    C1 = 1.0
+    C2 = 1.0
     while True:
         p += 1
         if not is_prime(p): continue
         if p == 2:
-            num = 1 + int((a + b) % 2 == 0)
-            den = 2
+            C0 *= 1 + int((a + b) % 2 == 0)
+            C0 /= 2
         elif a % p == 0:
             (num, den) = (p, p - 1) if b % p == 0 else (1, 1)
+            C0 *= num
+            C0 /= den
         else:
             kp = fast_kp(p, a, b, c)
-            num = p - kp
-            den = p - 1
-        ans *= num
-        ans /= den
-        print('For p=%s, factor: (%s/%s) Now: %s' % (p, num, den, ans))
+            dp = kp - 1
+            C1 *= p - dp
+            C1 /= p
+            C2 *= p * (p - 1 - dp)
+            C2 /= (p-1) * (p - dp)
+        ans = C0 * C1 * C2
+        print('For p=%s, C0=%.12f C1=%.12f C2=%.12f Ans: %s' % (p, C0, C1, C2, ans))
 
 if __name__ == '__main__':
     from builtins import input
